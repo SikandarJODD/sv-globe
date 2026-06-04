@@ -1,2 +1,14 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script lang="ts">
+	import CssAnchor from '$lib/examples/bind/css-anchor.svelte';
+	import Example from '$lib/examples/bind/example.svelte';
+	import FocusLocation from '$lib/examples/bind/focus-location.svelte';
+</script>
+
+<div>
+	<!-- <Example /> -->
+	<!-- <FocusLocation /> -->
+	<CssAnchor />
+</div>
+
+<style>
+</style>
