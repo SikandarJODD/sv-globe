@@ -39,7 +39,7 @@
 		command,
 		agents = ['npm', 'pnpm', 'yarn', 'bun'],
 		args,
-		agent = $bindable('npm')
+		agent = $bindable('pnpm')
 	}: PMCommandProps = $props();
 
 	const cmd = $derived(resolveCommand(agent, command, args));
@@ -48,17 +48,17 @@
 </script>
 
 <div data-slot="pm-command" class={cn(style({ variant }), className)}>
-	<div class="border-border flex place-items-center justify-between gap-2 border-b py-1 pr-2">
+	<div class="flex place-items-center justify-between gap-2 border-b border-border py-1 pr-2">
 		<div class="flex place-items-center gap-2 px-2">
-			<div class="bg-foreground flex size-4 place-items-center justify-center opacity-50">
-				<TerminalIcon class="text-background size-3" />
+			<div class="flex size-4 place-items-center justify-center bg-foreground opacity-50">
+				<TerminalIcon class="size-3 text-background" />
 			</div>
 			<Tabs.Root bind:value={agent}>
 				<Tabs.List class="h-auto bg-transparent p-0">
 					{#each agents as pm (pm)}
 						<Tabs.Trigger
 							value={pm}
-							class="h-7 font-mono text-sm font-light hover:text-ink data-active:border-ink/20 data-active:bg-ink/8 data-active:text-ink dark:data-active:border-primary/20 dark:data-active:bg-primary/10 dark:data-active:text-primary"
+							class="h-7 data-active:border-none! border-none focus-visible:ring-0 focus-visible:outline-none data-active:ring-0 font-mono text-sm font-light  hover:text-ink data-active:bg-ink/8 data-active:text-ink"
 						>
 							{pm}
 						</Tabs.Trigger>
@@ -73,7 +73,7 @@
 						<CopyButton
 							{...props}
 							text={commandText}
-							class="text-ink hover:text-ink/80 dark:text-primary dark:hover:text-primary/80 size-6 [&_svg]:size-3"
+							class="size-6 text-ink hover:text-ink/80 dark:text-primary dark:hover:text-primary/80 [&_svg]:size-3"
 						>
 							{#snippet icon()}
 								<ClipboardIcon />
@@ -86,7 +86,7 @@
 		</Tooltip.Provider>
 	</div>
 	<div class="no-scrollbar overflow-x-auto p-3">
-		<span class="text-muted-foreground font-mono text-sm leading-none font-light text-nowrap">
+		<span class="font-mono text-sm leading-none font-light text-nowrap text-muted-foreground">
 			{commandText}
 		</span>
 	</div>

@@ -40,7 +40,7 @@
 			{#if previousItem}
 				<a href={previousItem.href} class={cn(cardClass, 'items-start text-left')}>
 					<div
-						class="flex items-center gap-px text-xs font-medium text-ink/45 dark:text-muted-foreground"
+						class="flex items-center gap-px text-xs font-medium text-ink/70 dark:text-muted-foreground"
 					>
 						<ChevronLeftIcon class="size-4" />
 						<p
@@ -64,7 +64,7 @@
 						class="flex items-center gap-px text-xs font-medium text-ink/40 dark:text-muted-foreground"
 					>
 						<p
-							class="mb-0.5 font-figtree text-sm font-medium text-ink/70 group-hover:text-ink/90 dark:text-foreground"
+							class="mb-0.5 font-figtree text-sm font-medium text-ink/90 group-hover:text-ink dark:text-foreground"
 						>
 							{nextItem.label}
 						</p>

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Code } from '$lib/components/ui/code';
 	import { PMCommand } from '$lib/components/ui/pm-command';
-	import Base from '$lib/examples/bind/base.svelte';
-	import basicSource from '$lib/examples/bind/base.svelte?raw';
+	import Base from '$lib/components/usage/base.svelte';
+	import basicSource from '$lib/components/usage/base.svelte?raw';
 </script>
 
 <div class="w-full max-w-3xl space-y-10 pb-8">
@@ -32,7 +32,7 @@
 			</p>
 		</div>
 
-		<PMCommand command="install" args={['cobe']} />
+		<PMCommand variant='secondary' command="install" args={['cobe']} />
 
 		<p class="max-w-2xl font-figtree text-sm leading-7 text-muted-foreground">
 			Created by
