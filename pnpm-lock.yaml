@@ -20,6 +20,9 @@ importers:
       mode-watcher:
         specifier: ^1.1.0
         version: 1.1.0(svelte@5.56.1)
+      package-manager-detector:
+        specifier: ^1.6.0
+        version: 1.6.0
       runed:
         specifier: ^0.37.1
         version: 0.37.1(@sveltejs/kit@2.62.0(@sveltejs/vite-plugin-svelte@7.1.2(svelte@5.56.1)(vite@8.0.16(jiti@2.7.0)))(svelte@5.56.1)(typescript@6.0.3)(vite@8.0.16(jiti@2.7.0)))(svelte@5.56.1)
@@ -710,6 +713,9 @@ packages:
 
   oniguruma-to-es@4.3.6:
     resolution: {integrity: sha512-csuQ9x3Yr0cEIs/Zgx/OEt9iBw9vqIunAPQkx19R/fiMq2oGVTgcMqO/V3Ybqefr1TBvosI6jU539ksaBULJyA==}
+
+  package-manager-detector@1.6.0:
+    resolution: {integrity: sha512-61A5ThoTiDG/C8s8UMZwSorAGwMJ0ERVGj2OjoW5pAalsNOg15+iQiPzrLJ4jhZ1HJzmC2PIHT2oEiH3R5fzNA==}
 
   phosphor-svelte@3.1.0:
     resolution: {integrity: sha512-nldtxx+XCgNREvrb7O5xgDsefytXpSkPTx8Rnu3f2qQCUZLDV1rLxYSd2Jcwckuo9lZB1qKMqGR17P4UDC0PrA==}
@@ -1572,6 +1578,8 @@ snapshots:
       oniguruma-parser: 0.12.2
       regex: 6.1.0
       regex-recursion: 6.0.2
+
+  package-manager-detector@1.6.0: {}
 
   phosphor-svelte@3.1.0(svelte@5.56.1)(vite@8.0.16(jiti@2.7.0)):
     dependencies:
