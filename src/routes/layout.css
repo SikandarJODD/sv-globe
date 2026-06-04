@@ -2,6 +2,7 @@
 @import 'tw-animate-css';
 @import 'shadcn-svelte/tailwind.css';
 @import '@fontsource-variable/jetbrains-mono';
+@import '@fontsource-variable/figtree';
 
 @font-face {
 	font-family: 'GeistPixel';
@@ -86,6 +87,10 @@
 	--sidebar-accent-foreground: oklch(0.205 0 0);
 	--sidebar-border: oklch(0.922 0 0);
 	--sidebar-ring: oklch(0.708 0 0);
+
+	/* Colors from COBE Website */
+	--ink: lab(36 55.64 -107.68);
+	--ink-dim: lab(93 0 -8);
 }
 
 .dark {
@@ -132,6 +137,7 @@
 	--font-gp-line: 'GeistPixel Line', monospace;
 	--font-gp-square: 'GeistPixel Square', monospace;
 	--font-gp-triangle: 'GeistPixel Triangle', monospace;
+	--font-figtree: 'Figtree Variable', sans-serif;
 
 	--color-sidebar-ring: var(--sidebar-ring);
 	--color-sidebar-border: var(--sidebar-border);
@@ -171,6 +177,10 @@
 	--radius-2xl: calc(var(--radius) * 1.8);
 	--radius-3xl: calc(var(--radius) * 2.2);
 	--radius-4xl: calc(var(--radius) * 2.6);
+
+	/* COBE Design Tokens */
+	--color-ink: var(--ink);
+	--color-ink-dim: var(--ink-dim);
 }
 
 @layer base {
