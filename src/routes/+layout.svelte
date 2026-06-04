@@ -1,4 +1,5 @@
 <script lang="ts">
+	import LandingNav from '$lib/components/landing/landing-nav.svelte';
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { activeElement, PressedKeys } from 'runed';
@@ -20,4 +21,12 @@
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
 
 <ModeWatcher defaultMode="dark" />
-{@render children()}
+
+<main class="px-6 pt-10 pb-28 sm:px-8 lg:px-10 lg:pb-10">
+	<div class="mx-auto flex max-w-6xl justify-center">
+		<div class="grid w-full max-w-5xl gap-12 lg:grid-cols-[14rem_minmax(0,1fr)] lg:items-start">
+			<LandingNav />
+			{@render children()}
+		</div>
+	</div>
+</main>

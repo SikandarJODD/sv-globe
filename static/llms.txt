@@ -1,0 +1,14 @@
+Project: sv-globe
+
+Description:
+- Minimal SvelteKit site for Svelte Globe examples built with COBE.
+- Landing page includes install, usage, examples, and llms.txt sections.
+
+Primary stack:
+- SvelteKit
+- Svelte 5
+- Tailwind CSS 4
+- COBE
+
+Repository:
+- https://github.com/SikandarJODD/sv-globe
