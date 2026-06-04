@@ -1,56 +1,146 @@
 <script lang="ts">
-	// Basic Example
 	import createGlobe from 'cobe';
 	import { type Globe } from 'cobe';
 	import { onMount } from 'svelte';
 
+	type LocationItem = {
+		id: string;
+		label: string;
+		location: [number, number];
+	};
+
+	const size = 300;
+	const locations: LocationItem[] = [
+		{ id: 'nyc', label: 'New York', location: [40.71, -74.01] },
+		{ id: 'ldn', label: 'London', location: [51.5, -0.12] },
+		{ id: 'tok', label: 'Tokyo', location: [35.68, 139.65] },
+		{ id: 'syd', label: 'Sydney', location: [-33.87, 151.21] },
+		{ id: 'del', label: 'Delhi', location: [28.61, 77.21] }
+	];
+
 	let canvas: HTMLCanvasElement | null = $state(null);
 	let globe: Globe | null = $state(null);
+	let frame = $state(0);
 	let phi = $state(0);
+	let theta = $state(0.2);
+	let activeLocationId = $state('tok');
 
-	// Convert lat/long to globe angles
 	function locationToAngles(lat: number, long: number) {
 		return [Math.PI - ((long * Math.PI) / 180 - Math.PI / 2), (lat * Math.PI) / 180];
 	}
 
-	const [targetPhi, targetTheta] = locationToAngles(35.68, 139.65);
+	function normalizeDelta(delta: number) {
+		return Math.atan2(Math.sin(delta), Math.cos(delta));
+	}
 
-	// Animate the globe
+	function getActiveLocation() {
+		return locations.find((location) => location.id === activeLocationId) ?? locations[0];
+	}
+
+	function focusLocation(id: string) {
+		activeLocationId = id;
+	}
+
+	function getMarkers() {
+		return locations.map((location) => ({
+			id: location.id,
+			location: location.location,
+			size: location.id === activeLocationId ? 0.055 : 0.035
+		}));
+	}
+
 	function animate() {
-		const distPhi = targetPhi - phi;
+		const activeLocation = getActiveLocation();
+		const [targetPhi, targetTheta] = locationToAngles(...activeLocation.location);
+		const distPhi = normalizeDelta(targetPhi - phi);
+		const distTheta = targetTheta - theta;
+
 		phi += distPhi * 0.08;
-		globe?.update({ phi, theta: targetTheta });
-		requestAnimationFrame(animate);
+		theta += distTheta * 0.08;
+
+		globe?.update({
+			phi,
+			theta,
+			markers: getMarkers()
+		});
+
+		frame = requestAnimationFrame(animate);
 	}
 
 	onMount(() => {
 		if (!canvas) return;
+
+		const [initialPhi, initialTheta] = locationToAngles(...getActiveLocation().location);
+		phi = initialPhi;
+		theta = initialTheta;
+
 		globe = createGlobe(canvas, {
 			devicePixelRatio: 2,
-			width: 200,
-			height: 200,
-			phi: 0,
-			theta: 0.2,
+			width: size,
+			height: size,
+			phi,
+			theta,
 			dark: 0,
 			diffuse: 1.2,
-			mapSamples: 16000,
+			mapSamples: 13000,
 			mapBrightness: 6,
 			baseColor: [1, 1, 1],
 			markerColor: [0.2, 0.4, 1],
 			glowColor: [1, 1, 1],
-			markers: [
-				{ location: [37.78, -122.44], size: 0.03, id: 'sf' },
-				{ location: [40.71, -74.01], size: 0.03, id: 'nyc' }
-			],
-			arcs: [{ from: [37.78, -122.44], to: [40.71, -74.01] }],
-			arcColor: [0.3, 0.5, 1],
-			arcWidth: 0.5,
-			arcHeight: 0.3
+			markers: getMarkers()
 		});
+
 		animate();
+
+		return () => {
+			cancelAnimationFrame(frame);
+			globe?.destroy();
+			globe = null;
+		};
 	});
 </script>
 
-<div class="container">
-	<canvas bind:this={canvas}></canvas>
+<div class="focus-demo">
+	<div class="globe">
+		<canvas class="globe-canvas" bind:this={canvas}></canvas>
+	</div>
+
+	<div class="location-list" aria-label="Focus globe on a location">
+		{#each locations as location (location.id)}
+			<button
+				type="button"
+				class={`rounded-full border px-3 py-2 font-figtree text-xs leading-none font-medium transition-all duration-200 ${
+					location.id === activeLocationId
+						? 'border-ink/20 bg-ink text-background'
+						: 'border-ink/12 bg-background/95 text-ink/70 hover:-translate-y-px hover:border-ink/20 hover:text-ink'
+				}`}
+				onclick={() => focusLocation(location.id)}
+			>
+				{location.label}
+			</button>
+		{/each}
+	</div>
 </div>
+
+<style>
+	.globe {
+		position: relative;
+		width: 300px;
+		height: 300px;
+	}
+
+	.globe-canvas {
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	.location-list {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0.5rem;
+		max-width: 320px;
+	}
+
+</style>

@@ -51,20 +51,16 @@
 	});
 </script>
 
-<div class="container">
-	<div class="globe">
-		<canvas bind:this={canvas} class="globe-canvas"></canvas>
-		{#if globe}
-			{#each markers as marker (marker.id)}
-				<div
-					class="marker-label"
-					style={`position-anchor: --cobe-${marker.id}; --marker-visible: var(--cobe-visible-${marker.id}, 0);`}
-				>
-					{marker.label}
-				</div>
-			{/each}
-		{/if}
-	</div>
+<div class="globe">
+	<canvas bind:this={canvas} class="globe-canvas"></canvas>
+	{#each markers as marker (marker.id)}
+		<div
+			class="marker-label"
+			style={`position-anchor: --cobe-${marker.id}; --marker-visible: var(--cobe-visible-${marker.id}, 0);`}
+		>
+			{marker.label}
+		</div>
+	{/each}
 </div>
 
 <style>
@@ -72,7 +68,6 @@
 		position: relative;
 		width: 300px;
 		height: 300px;
-		border: 1px solid #d4d4d8;
 	}
 
 	.globe-canvas {
@@ -87,7 +82,7 @@
 		left: anchor(center);
 		margin-bottom: 8px;
 		padding: 0.25rem 0.5rem;
-		background: #1a1a1a;
+		background: var(--color-ink);
 		color: #fff;
 		font-size: 0.75rem;
 		border-radius: 4px;

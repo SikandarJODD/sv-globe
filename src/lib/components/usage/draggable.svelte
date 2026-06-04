@@ -170,7 +170,7 @@
 		cursor: grab;
 		touch-action: none;
 		user-select: none;
-		border: 1px solid #d4d4d8;
+		/* border: 1px solid #d4d4d8; */
 	}
 
 	canvas.dragging {

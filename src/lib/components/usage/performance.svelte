@@ -33,11 +33,7 @@
 			markers: [
 				{ location: [37.78, -122.44], size: 0.03, id: 'sf' },
 				{ location: [40.71, -74.01], size: 0.03, id: 'nyc' }
-			],
-			arcs: [{ from: [37.78, -122.44], to: [40.71, -74.01] }],
-			arcColor: [0.3, 0.5, 1],
-			arcWidth: 0.5,
-			arcHeight: 0.3
+			]
 		});
 	}
 
@@ -90,11 +86,11 @@
 				stopAnimation({ destroy: true });
 			},
 			{
-				threshold: 0.1,
-                // https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API#rootmargin
-                // i have added -200px so you can test the unmounting behavior without fully scrolling the globe out of view. 
-                // Adjust as needed for your layout.
-                // rootMargin: '-200px 0px -50px 0px' 
+				threshold: 0.1
+				// https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API#rootmargin
+				// i have added -200px so you can test the unmounting behavior without fully scrolling the globe out of view.
+				// Adjust as needed for your layout.
+				// rootMargin: '-200px 0px -50px 0px'
 			}
 		);
 
@@ -110,7 +106,7 @@
 </script>
 
 <div class="globe">
-	<canvas bind:this={canvas}></canvas>
+	<canvas class="globe-canvas" bind:this={canvas}></canvas>
 </div>
 
 <style>
@@ -119,10 +115,9 @@
 		height: 300px;
 	}
 
-	canvas {
+	.globe-canvas {
 		display: block;
 		width: 100%;
 		height: 100%;
-		border: 1px solid #d4d4d8;
 	}
 </style>

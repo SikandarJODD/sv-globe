@@ -38,7 +38,7 @@
 		>
 			<Tabs.Trigger
 				value="preview"
-				class="h-auto flex-none rounded-none border-none bg-transparent! px-0 pb-1 font-figtree text-sm font-medium text-ink/55 shadow-none! transition-colors hover:text-ink dark:text-muted-foreground dark:hover:text-foreground data-active:text-ink dark:data-active:text-foreground"
+				class="h-auto flex-none rounded-none border-none bg-transparent! px-0 pb-1 font-figtree text-sm font-medium text-ink/55 shadow-none! transition-colors hover:text-ink dark:text-muted-foreground dark:hover:text-foreground data-active:text-ink dark:data-active:text-foreground data-active:border-ink/90 dark:data-active:border-foreground"
 			>
 				Preview
 			</Tabs.Trigger>
