@@ -49,7 +49,7 @@
 
 		<SponsorButton
 			href={sponsorLink}
-			className="border border-dashed border-ink/40 bg-ink-dim/30 px-4 py-2.5 text-xs text-ink transition-all duration-200 dark:border-primary/30 dark:bg-card dark:text-primary dark:hover:bg-card/80"
+			class="border border-dashed border-ink/40 bg-ink-dim/30 px-4 py-2.5 text-xs text-ink transition-all duration-200 dark:border-primary/30 dark:bg-card dark:text-primary dark:hover:bg-card/80"
 		/>
 	</div>
 </nav>

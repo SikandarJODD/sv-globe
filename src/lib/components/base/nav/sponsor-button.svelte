@@ -1,22 +1,15 @@
 <script lang="ts">
+	import { cn } from '$lib/utils';
+
 	interface Props {
 		href: string;
-		className?: string;
+		class?: string;
 		label?: string;
 	}
 
-	let {
-		href,
-		className = '',
-		label = 'Sponsor my work'
-	}: Props = $props();
+	let { href, class: className = '', label = 'Sponsor my work' }: Props = $props();
 </script>
 
-<a
-	href={href}
-	target="_blank"
-	rel="noreferrer"
-	class={className}
->
+<a {href} target="_blank" rel="noreferrer" class={cn('min-w-full', className)}>
 	{label}
 </a>

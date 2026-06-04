@@ -1,21 +1,21 @@
 <script lang="ts">
+	import { onDestroy, onMount } from 'svelte';
 	import type { Globe } from 'cobe';
 	import { Spring } from 'svelte/motion';
-	import { onDestroy, onMount } from 'svelte';
 
-	const size = 300;
-	const baseTheta = 0.2;
+	import { showcaseConfigs, stickerMarkers } from './showcase-data';
+
+	const config = showcaseConfigs.stickers;
 	const thetaOffsetMin = -0.4;
-	const thetaOffsetMax = 0.4;
+	const thetaOffsetMax = 0.35;
 
 	let canvas: HTMLCanvasElement | null = null;
-	let globe: Globe | null = null;
+	let globe: Globe | null = $state(null);
 	let observer: IntersectionObserver | null = null;
 	let createGlobePromise: Promise<typeof import('cobe').default> | null = null;
-	let isVisible = false;
-	let isDragging = $state(false);
-
 	let frame = 0;
+	let isVisible = $state(false);
+	let isDragging = $state(false);
 	let autoPhi = 0;
 	let dragStart: { x: number; y: number; phi: number; theta: number } | null = null;
 	let lastPointer: { x: number; y: number; t: number } | null = null;
@@ -32,6 +32,37 @@
 		damping: 0.7,
 		precision: 0.0001
 	});
+
+	function stopAnimation() {
+		if (!frame) return;
+
+		cancelAnimationFrame(frame);
+		frame = 0;
+	}
+
+	function destroyGlobe() {
+		stopAnimation();
+		globe?.destroy();
+		globe = null;
+	}
+
+	function animate() {
+		if (!globe) {
+			frame = 0;
+			return;
+		}
+
+		if (!isDragging) {
+			autoPhi += 0.003;
+		}
+
+		globe.update({
+			phi: autoPhi + phiOffset.current,
+			theta: config.theta + thetaOffset.current
+		});
+
+		frame = requestAnimationFrame(animate);
+	}
 
 	function clamp(value: number, min: number, max: number) {
 		return Math.min(max, Math.max(min, value));
@@ -96,18 +127,6 @@
 		releaseVelocity = { phi: 0, theta: 0 };
 	}
 
-	function stopAnimation() {
-		if (!frame) return;
-		cancelAnimationFrame(frame);
-		frame = 0;
-	}
-
-	function destroyGlobe() {
-		stopAnimation();
-		globe?.destroy();
-		globe = null;
-	}
-
 	async function getCreateGlobe() {
 		createGlobePromise ??= import('cobe').then((module) => module.default);
 		return createGlobePromise;
@@ -125,27 +144,35 @@
 
 		if (!canvas || globe || !isVisible) return;
 
+		const devicePixelRatio = Math.min(window.devicePixelRatio, 2);
+		const renderedSize = Math.max(
+			320,
+			Math.round(canvas.getBoundingClientRect().width * devicePixelRatio)
+		);
+
 		globe = createGlobe(canvas, {
-			devicePixelRatio: Math.min(window.devicePixelRatio, 2),
-			width: size,
-			height: size,
-			phi: 0,
-			theta: baseTheta,
-			dark: 0,
-			diffuse: 1.2,
-			mapSamples: 16000,
-			mapBrightness: 6,
-			baseColor: [1, 1, 1],
-			markerColor: [0.2, 0.4, 1],
-			glowColor: [1, 1, 1],
-			markers: [
-				{ location: [37.78, -122.44], size: 0.03, id: 'sf' },
-				{ location: [40.71, -74.01], size: 0.03, id: 'nyc' }
-			],
-			arcs: [{ from: [37.78, -122.44], to: [40.71, -74.01] }],
-			arcColor: [0.3, 0.5, 1],
+			devicePixelRatio,
+			width: renderedSize,
+			height: renderedSize,
+			phi: autoPhi + phiOffset.current,
+			theta: config.theta + thetaOffset.current,
+			dark: config.dark,
+			diffuse: 1.5,
+			mapSamples: 13000,
+			mapBrightness: config.mapBrightness,
+			baseColor: config.baseColor,
+			markerColor: config.markerColor,
+			glowColor: [0.94, 0.93, 0.91],
+			markers: stickerMarkers.map(({ id, location }) => ({
+				id,
+				location,
+				size: config.markerSize
+			})),
+			markerElevation: config.markerElevation,
+			arcColor: config.arcColor,
 			arcWidth: 0.5,
-			arcHeight: 0.3
+			arcHeight: 0.25,
+			opacity: 0.7
 		});
 
 		animate();
@@ -153,24 +180,6 @@
 
 	let onWindowPointerMove: ((event: PointerEvent) => void) | null = null;
 	let onWindowPointerUp: ((event: PointerEvent) => void) | null = null;
-
-	function animate() {
-		if (!globe) {
-			frame = 0;
-			return;
-		}
-
-		if (!isDragging) {
-			autoPhi += 0.005;
-		}
-
-		globe.update({
-			phi: autoPhi + phiOffset.current,
-			theta: baseTheta + thetaOffset.current
-		});
-
-		frame = requestAnimationFrame(animate);
-	}
 
 	onMount(() => {
 		if (!canvas) return;
@@ -182,16 +191,21 @@
 		window.addEventListener('pointerup', onWindowPointerUp, { passive: true });
 		window.addEventListener('pointercancel', onWindowPointerUp, { passive: true });
 
-		observer = new IntersectionObserver(([entry]) => {
-			if (!entry) return;
-			isVisible = entry.isIntersecting;
-			if (isVisible) {
-				void startGlobe();
-				return;
-			}
+		observer = new IntersectionObserver(
+			([entry]) => {
+				if (!entry) return;
 
-			stopAnimation();
-		}, { threshold: 0.1 });
+				isVisible = entry.isIntersecting;
+
+				if (isVisible) {
+					void startGlobe();
+					return;
+				}
+
+				stopAnimation();
+			},
+			{ threshold: 0.15 }
+		);
 
 		observer.observe(canvas);
 	});
@@ -218,28 +232,115 @@
 	});
 </script>
 
-<div class="globe">
-	<canvas bind:this={canvas} class:dragging={isDragging} onpointerdown={handlePointerDown}></canvas>
+<div class="showcases-demo">
+	<div class="showcases-globe">
+		<canvas
+			bind:this={canvas}
+			class="showcases-canvas"
+			class:is-ready={!!globe}
+			class:dragging={isDragging}
+			onpointerdown={handlePointerDown}
+		></canvas>
+
+		{#each stickerMarkers as marker (marker.id)}
+			<div
+				class="showcase-sticker"
+				style={`position-anchor: --cobe-${marker.id}; opacity: var(--cobe-visible-${marker.id}, 0);`}
+			>
+				{marker.sticker}
+			</div>
+		{/each}
+
+		<svg aria-hidden="true" class="showcase-filter">
+			<defs>
+				<filter id="sticker-outline" x="-40%" y="-40%" width="180%" height="180%">
+					<feMorphology in="SourceAlpha" operator="dilate" radius="2.2" result="outline" />
+					<feFlood flood-color="white" result="outline-color" />
+					<feComposite in="outline-color" in2="outline" operator="in" result="sticker-fill" />
+					<feMerge>
+						<feMergeNode in="sticker-fill" />
+						<feMergeNode in="SourceGraphic" />
+					</feMerge>
+				</filter>
+			</defs>
+		</svg>
+	</div>
 </div>
 
 <style>
-	.globe {
-		position: relative;
-		width: 300px;
-		height: 300px;
+	.showcases-demo {
+		display: flex;
+		width: 100%;
+		flex-direction: column;
+		align-items: center;
 	}
 
-	canvas {
-		display: block;
+	.showcases-globe {
+		position: relative;
+		width: 350px;
+		height: 350px;
+		aspect-ratio: 1;
+		user-select: none;
+	}
+	@media (min-width: 640px) {
+		.showcases-globe {
+			width: 520px;
+			height: 520px;
+		}
+	}
+
+	.showcases-canvas {
 		width: 100%;
 		height: 100%;
+		aspect-ratio: 1;
+		border-radius: 9999px;
 		cursor: grab;
+		opacity: 0;
+		transition: opacity 0.8s ease;
 		touch-action: none;
-		user-select: none;
-		/* border: 1px solid #d4d4d8; */
 	}
 
-	canvas.dragging {
+	.showcases-canvas.is-ready {
+		opacity: 1;
+	}
+
+	.showcases-canvas.dragging,
+	.showcases-canvas:active {
 		cursor: grabbing;
 	}
+
+	.showcase-sticker {
+		position: absolute;
+		bottom: anchor(top);
+		left: anchor(center);
+		/* translate: -50% 0; */
+		font-size: 2rem;
+		line-height: 1;
+		transform: rotate(-12deg);
+		filter: url(#sticker-outline) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
+		transition:
+			opacity 0.2s,
+			filter 0.2s;
+		pointer-events: none;
+	}
+
+	.showcase-sticker:nth-child(3n) {
+		transform: rotate(6deg);
+	}
+
+	.showcase-sticker:nth-child(4n) {
+		transform: rotate(-4deg);
+	}
+
+	.showcase-sticker:nth-child(5n) {
+		transform: rotate(10deg);
+	}
+
+	/* .showcase-filter {
+		position: absolute;
+		width: 0;
+		height: 0;
+		overflow: hidden;
+		pointer-events: none;
+	} */
 </style>

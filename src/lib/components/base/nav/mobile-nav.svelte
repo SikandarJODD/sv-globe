@@ -79,7 +79,7 @@
 
 				<Separator class="bg-ink/15 dark:bg-secondary" />
 
-				<div class="flex items-center justify-between gap-4">
+				<div class="flex w-full items-center justify-between gap-4">
 					<a
 						href={githubLink}
 						target="_blank"
@@ -92,10 +92,12 @@
 					<ThemeButton className="text-muted-foreground" />
 				</div>
 
-				<SponsorButton
-					href={sponsorLink}
-					className="border border-dashed border-ink px-4 py-3 text-sm text-ink dark:border-primary/30 dark:text-primary"
-				/>
+				<div class="w-full flex text-center">
+					<SponsorButton
+						href={sponsorLink}
+						class="min-w-full border border-dashed border-ink px-4 py-3 text-sm text-ink dark:border-primary/30 dark:text-primary"
+					/>
+				</div>
 			</div>
 		</Drawer.DrawerContent>
 	</Drawer.Drawer>
