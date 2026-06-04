@@ -2,9 +2,29 @@ const stickerCode = `<script lang="ts">
 \timport { onDestroy, onMount } from 'svelte';
 \timport type { Globe } from 'cobe';
 \timport { Spring } from 'svelte/motion';
-\timport { showcaseConfigs, stickerMarkers } from './showcase-data';
 
-\tconst config = showcaseConfigs.stickers;
+\t// Keep the globe theme close to the preview component.
+\tconst config = {
+\t\ttheta: 0.2,
+\t\tdark: 0,
+\t\tmapBrightness: 8,
+\t\tmarkerColor: [0.85, 0.35, 0.6] as [number, number, number],
+\t\tbaseColor: [1, 1, 1] as [number, number, number],
+\t\tmarkerSize: 0.03
+\t};
+
+\t// Inline sticker data keeps the example self-contained for copy/paste.
+\tconst stickerMarkers = [
+\t\t{ id: 'sticker-paris', location: [48.86, 2.35] as [number, number], sticker: '🥐' },
+\t\t{ id: 'sticker-tokyo', location: [35.68, 139.65] as [number, number], sticker: '🗼' },
+\t\t{ id: 'sticker-nyc', location: [40.71, -74.01] as [number, number], sticker: '🍎' },
+\t\t{ id: 'sticker-rio', location: [-22.91, -43.17] as [number, number], sticker: '🎭' },
+\t\t{ id: 'sticker-sydney', location: [-33.87, 151.21] as [number, number], sticker: '🐨' },
+\t\t{ id: 'sticker-cairo', location: [30.04, 31.24] as [number, number], sticker: '🐪' },
+\t\t{ id: 'sticker-london', location: [51.51, -0.13] as [number, number], sticker: '☕' },
+\t\t{ id: 'sticker-seoul', location: [37.57, 126.98] as [number, number], sticker: '🎮' }
+\t];
+
 \tconst thetaOffsetMin = -0.4;
 \tconst thetaOffsetMax = 0.35;
 
@@ -20,6 +40,7 @@ const stickerCode = `<script lang="ts">
 \tlet lastPointer: { x: number; y: number; t: number } | null = null;
 \tlet releaseVelocity = { phi: 0, theta: 0 };
 
+\t// Spring offsets make drag + release feel less mechanical.
 \tconst phiOffset = new Spring(0, {
 \t\tstiffness: 0.12,
 \t\tdamping: 0.7,
@@ -31,6 +52,22 @@ const stickerCode = `<script lang="ts">
 \t\tdamping: 0.7,
 \t\tprecision: 0.0001
 \t});
+
+\tfunction clamp(value: number, min: number, max: number) {
+\t\treturn Math.min(max, Math.max(min, value));
+\t}
+
+\tfunction stopAnimation() {
+\t\tif (!frame) return;
+\t\tcancelAnimationFrame(frame);
+\t\tframe = 0;
+\t}
+
+\tfunction destroyGlobe() {
+\t\tstopAnimation();
+\t\tglobe?.destroy();
+\t\tglobe = null;
+\t}
 
 \tfunction animate() {
 \t\tif (!globe) {
@@ -46,17 +83,6 @@ const stickerCode = `<script lang="ts">
 \t\t});
 
 \t\tframe = requestAnimationFrame(animate);
-\t}
-
-\tfunction clamp(value: number, min: number, max: number) {
-\t\treturn Math.min(max, Math.max(min, value));
-\t}
-
-\tfunction destroyGlobe() {
-\t\tif (frame) cancelAnimationFrame(frame);
-\t\tframe = 0;
-\t\tglobe?.destroy();
-\t\tglobe = null;
 \t}
 
 \tasync function getCreateGlobe() {
@@ -91,7 +117,6 @@ const stickerCode = `<script lang="ts">
 \t\t\tbaseColor: config.baseColor,
 \t\t\tmarkerColor: config.markerColor,
 \t\t\tglowColor: [1, 1, 1],
-\t\t\tmarkerSize: config.markerSize,
 \t\t\tmarkers: stickerMarkers.map(({ id, location }) => ({
 \t\t\t\tid,
 \t\t\t\tlocation,
@@ -109,9 +134,9 @@ const stickerCode = `<script lang="ts">
 \t\t\tphi: phiOffset.target,
 \t\t\ttheta: thetaOffset.target
 \t\t};
-\t\tisDragging = true;
 \t\tlastPointer = { x: event.clientX, y: event.clientY, t: performance.now() };
 \t\treleaseVelocity = { phi: 0, theta: 0 };
+\t\tisDragging = true;
 \t\tcanvas?.setPointerCapture?.(event.pointerId);
 \t}
 
@@ -144,8 +169,9 @@ const stickerCode = `<script lang="ts">
 
 \tfunction handlePointerUp(event?: PointerEvent) {
 \t\tif (!dragStart) return;
-\t\tdragStart = null;
+
 \t\tisDragging = false;
+\t\tdragStart = null;
 \t\tlastPointer = null;
 
 \t\tif (event && canvas?.hasPointerCapture(event.pointerId)) {
@@ -173,6 +199,7 @@ const stickerCode = `<script lang="ts">
 \t\twindow.addEventListener('pointerup', onWindowPointerUp, { passive: true });
 \t\twindow.addEventListener('pointercancel', onWindowPointerUp, { passive: true });
 
+\t\t// Lazy-start the globe so the preview does not render off-screen.
 \t\tobserver = new IntersectionObserver(([entry]) => {
 \t\t\tif (!entry) return;
 
@@ -182,10 +209,7 @@ const stickerCode = `<script lang="ts">
 \t\t\t\treturn;
 \t\t\t}
 
-\t\t\tif (frame) {
-\t\t\t\tcancelAnimationFrame(frame);
-\t\t\t\tframe = 0;
-\t\t\t}
+\t\t\tstopAnimation();
 \t\t}, { threshold: 0.15 });
 
 \t\tobserver.observe(canvas);
@@ -214,6 +238,7 @@ const stickerCode = `<script lang="ts">
 \t<canvas
 \t\tbind:this={canvas}
 \t\tclass="showcases-canvas"
+\t\tclass:dragging={isDragging}
 \t\tonpointerdown={handlePointerDown}
 \t></canvas>
 
@@ -225,7 +250,76 @@ const stickerCode = `<script lang="ts">
 \t\t\t{marker.sticker}
 \t\t</div>
 \t{/each}
-</div>`;
+
+\t<svg aria-hidden="true" class="showcase-filter">
+\t\t<defs>
+\t\t\t<filter id="sticker-outline" x="-40%" y="-40%" width="180%" height="180%">
+\t\t\t\t<feMorphology in="SourceAlpha" operator="dilate" radius="2.2" result="outline" />
+\t\t\t\t<feFlood flood-color="white" result="outline-color" />
+\t\t\t\t<feComposite in="outline-color" in2="outline" operator="in" result="sticker-fill" />
+\t\t\t\t<feMerge>
+\t\t\t\t\t<feMergeNode in="sticker-fill" />
+\t\t\t\t\t<feMergeNode in="SourceGraphic" />
+\t\t\t\t</feMerge>
+\t\t\t</filter>
+\t\t</defs>
+\t</svg>
+</div>
+
+<style>
+\t.showcases-globe {
+\t\tposition: relative;
+\t\twidth: min(100%, 26rem);
+\t\taspect-ratio: 1;
+\t\tuser-select: none;
+\t}
+
+\t.showcases-canvas {
+\t\twidth: 100%;
+\t\theight: 100%;
+\t\taspect-ratio: 1;
+\t\tborder-radius: 9999px;
+\t\tcursor: grab;
+\t\ttouch-action: none;
+\t}
+
+\t.showcases-canvas.dragging {
+\t\tcursor: grabbing;
+\t}
+
+\t.showcase-sticker {
+\t\tposition: absolute;
+\t\tbottom: anchor(top);
+\t\tleft: anchor(center);
+\t\ttranslate: -50% 0;
+\t\tfont-size: clamp(1.6rem, 1rem + 1vw, 2rem);
+\t\tline-height: 1;
+\t\ttransform: rotate(-8deg);
+\t\tfilter: url(#sticker-outline) drop-shadow(0 2px 3px rgb(0 0 0 / 0.3));
+\t\tpointer-events: none;
+\t\ttransition: opacity 0.2s;
+\t}
+
+\t.showcase-sticker:nth-child(3n) {
+\t\ttransform: rotate(6deg);
+\t}
+
+\t.showcase-sticker:nth-child(4n) {
+\t\ttransform: rotate(-4deg);
+\t}
+
+\t.showcase-sticker:nth-child(5n) {
+\t\ttransform: rotate(10deg);
+\t}
+
+\t.showcase-filter {
+\t\tposition: absolute;
+\t\twidth: 0;
+\t\theight: 0;
+\t\toverflow: hidden;
+\t\tpointer-events: none;
+\t}
+</style>`;
 
 export const exampleCode = {
 	sticker: stickerCode
