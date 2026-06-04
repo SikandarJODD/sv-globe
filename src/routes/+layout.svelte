@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Nav from '$lib/components/base/nav/nav.svelte';
+	import DocsBottomNav from '$lib/components/base/docs-bottom-nav.svelte';
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { activeElement, PressedKeys } from 'runed';
@@ -26,7 +27,12 @@
 	<div class="mx-auto flex max-w-6xl justify-center">
 		<div class="grid w-full max-w-5xl gap-12 lg:grid-cols-[14rem_minmax(0,1fr)] lg:items-start">
 			<Nav />
-			{@render children()}
+			<div class="flex min-w-0 flex-col gap-10">
+				<div class="min-w-0">
+					{@render children()}
+				</div>
+				<DocsBottomNav />
+			</div>
 		</div>
 	</div>
 </main>
