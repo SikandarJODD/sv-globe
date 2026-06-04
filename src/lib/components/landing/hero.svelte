@@ -10,17 +10,19 @@
 <div class="w-full max-w-3xl text-center lg:text-left">
 	<section class="space-y-6">
 		<h1
-			class="bg-linear-to-b from-blue-500 to-ink bg-clip-text font-gp-circle text-5xl text-balance text-transparent md:text-6xl xl:text-5xl dark:from-white dark:to-neutral-700"
+			class="bg-linear-to-b from-blue-500 from-20% to-ink bg-clip-text font-gp-circle text-5xl text-balance text-transparent md:text-6xl xl:text-5xl dark:from-white dark:to-neutral-600"
 		>
 			Svelte Globe Examples
 		</h1>
-		<p class="max-w-2xl font-figtree text-lg text-balance text-muted-foreground">
-			Provides setup notes and example patterns for building globe interfaces with
+		<p class="max-w-3xl font-figtree text-lg text-balance text-muted-foreground">
+			Setup guides and example patterns for building 3D globe interfaces in Svelte.
+			<br />
+			Powered by
 			<a
 				href="https://cobe.vercel.app"
 				target="_blank"
 				rel="noreferrer"
-				class="text-primary underline underline-offset-2"
+				class="text-ink dark:text-primary underline underline-offset-2"
 			>
 				Cobe
 			</a>.

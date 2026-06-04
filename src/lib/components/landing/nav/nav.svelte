@@ -9,9 +9,8 @@
 	import Separator from '$lib/components/ui/separator/separator.svelte';
 
 	const sectionLinks = [
-		{ href: '/#install', label: 'Install' },
-		{ href: '/#usage', label: 'Usage' },
-		{ href: '/#examples', label: 'Examples' },
+		{ href: '/#goal', label: 'Goal' },
+		{ href: '/#credits', label: 'Credits' },
 		{ href: '/llms.txt', label: 'llms.txt' }
 	];
 
@@ -70,11 +69,14 @@
 			</Button>
 		</div>
 
-		<div
-			class="border border-dashed border-ink px-4 py-2.5 text-xs text-ink transition-all duration-200 dark:border-primary/30 dark:bg-card dark:text-primary dark:hover:bg-card/80"
+		<a
+			href="https://github.com/sponsors/SikandarJODD"
+			target="_blank"
+			rel="noreferrer"
+			class="border border-dashed border-ink/40 px-4 py-2.5 text-xs text-ink transition-all duration-200 dark:border-primary/30 bg-ink-dim/30 dark:bg-card dark:text-primary dark:hover:bg-card/80"
 		>
 			Sponsor my work
-		</div>
+		</a>
 	</div>
 </nav>
 
@@ -157,11 +159,14 @@
 					</Button>
 				</div>
 
-				<div
+				<a
+					href="https://github.com/sponsors/SikandarJODD"
+					target="_blank"
+					rel="noreferrer"
 					class="border border-dashed border-ink px-4 py-3 text-sm text-ink dark:border-primary/30 dark:text-primary"
 				>
 					Sponsor my work
-				</div>
+				</a>
 			</div>
 		</Drawer.DrawerContent>
 	</Drawer.Drawer>
