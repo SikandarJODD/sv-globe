@@ -38,6 +38,8 @@
 		"vite": "^8.0.7"
 	},
 	"dependencies": {
+		"@fontsource-variable/figtree": "^5.2.10",
+		"@pierre/diffs": "^1.2.7",
 		"cobe": "^2.0.1",
 		"mode-watcher": "^1.1.0",
 		"runed": "^0.37.1"
