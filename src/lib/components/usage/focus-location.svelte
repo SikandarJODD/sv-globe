@@ -1,7 +1,6 @@
 <script lang="ts">
-	import createGlobe from 'cobe';
-	import { type Globe } from 'cobe';
-	import { onMount } from 'svelte';
+	import type { Globe } from 'cobe';
+	import { onDestroy, onMount } from 'svelte';
 
 	type LocationItem = {
 		id: string;
@@ -18,11 +17,14 @@
 		{ id: 'del', label: 'Delhi', location: [28.61, 77.21] }
 	];
 
-	let canvas: HTMLCanvasElement | null = $state(null);
-	let globe: Globe | null = $state(null);
-	let frame = $state(0);
-	let phi = $state(0);
-	let theta = $state(0.2);
+	let canvas: HTMLCanvasElement | null = null;
+	let globe: Globe | null = null;
+	let observer: IntersectionObserver | null = null;
+	let createGlobePromise: Promise<typeof import('cobe').default> | null = null;
+	let isVisible = false;
+	let frame = 0;
+	let phi = 0;
+	let theta = 0.2;
 	let activeLocationId = $state('tok');
 
 	function locationToAngles(lat: number, long: number) {
@@ -50,6 +52,11 @@
 	}
 
 	function animate() {
+		if (!globe) {
+			frame = 0;
+			return;
+		}
+
 		const activeLocation = getActiveLocation();
 		const [targetPhi, targetTheta] = locationToAngles(...activeLocation.location);
 		const distPhi = normalizeDelta(targetPhi - phi);
@@ -58,7 +65,7 @@
 		phi += distPhi * 0.08;
 		theta += distTheta * 0.08;
 
-		globe?.update({
+		globe.update({
 			phi,
 			theta,
 			markers: getMarkers()
@@ -67,15 +74,37 @@
 		frame = requestAnimationFrame(animate);
 	}
 
-	onMount(() => {
+	function stopAnimation() {
+		if (!frame) return;
+		cancelAnimationFrame(frame);
+		frame = 0;
+	}
+
+	function destroyGlobe() {
+		stopAnimation();
+		globe?.destroy();
+		globe = null;
+	}
+
+	async function getCreateGlobe() {
+		createGlobePromise ??= import('cobe').then((module) => module.default);
+		return createGlobePromise;
+	}
+
+	async function startGlobe() {
 		if (!canvas) return;
 
-		const [initialPhi, initialTheta] = locationToAngles(...getActiveLocation().location);
-		phi = initialPhi;
-		theta = initialTheta;
+		if (globe) {
+			if (!frame) animate();
+			return;
+		}
+
+		const createGlobe = await getCreateGlobe();
+
+		if (!canvas || globe || !isVisible) return;
 
 		globe = createGlobe(canvas, {
-			devicePixelRatio: 2,
+			devicePixelRatio: Math.min(window.devicePixelRatio, 2),
 			width: size,
 			height: size,
 			phi,
@@ -91,12 +120,35 @@
 		});
 
 		animate();
+	}
 
-		return () => {
-			cancelAnimationFrame(frame);
-			globe?.destroy();
-			globe = null;
-		};
+	onMount(() => {
+		if (!canvas) return;
+
+		const [initialPhi, initialTheta] = locationToAngles(...getActiveLocation().location);
+		phi = initialPhi;
+		theta = initialTheta;
+
+		observer = new IntersectionObserver(([entry]) => {
+			if (!entry) return;
+			isVisible = entry.isIntersecting;
+			if (isVisible) {
+				void startGlobe();
+				return;
+			}
+
+			stopAnimation();
+		}, { threshold: 0.1 });
+
+		observer.observe(canvas);
+	});
+
+	onDestroy(() => {
+		observer?.disconnect();
+		observer = null;
+		isVisible = false;
+		destroyGlobe();
+		canvas = null;
 	});
 </script>
 

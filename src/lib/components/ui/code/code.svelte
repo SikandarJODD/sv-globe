@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { File, type FileContents, type SupportedLanguages, type ThemesType } from '@pierre/diffs';
+	import type { File, FileContents, ThemesType } from '@pierre/diffs';
 	import { mode } from 'mode-watcher';
-	import { watch } from 'runed';
+	import { onDestroy, onMount } from 'svelte';
 
 	const defaultTheme: ThemesType = {
 		dark: 'pierre-dark',
@@ -26,51 +26,91 @@
 		theme = defaultTheme
 	}: CodeProps = $props();
 
-	const renderCode = (node: HTMLDivElement) => {
-		// Create one Diffs instance per attached node so Svelte can fully dispose
-		// it when the attachment is removed.
-		const instance = new File({
-			theme,
-			overflow,
-			themeType: mode.current,
-			stickyHeader,
-			disableFileHeader
-		});
+	let container: HTMLDivElement | null = null;
+	let instance: File | null = null;
+	let observer: IntersectionObserver | null = null;
+	let hasRendered = false;
+	let renderPromise: Promise<void> | null = null;
 
-		// This component is optimized for mount-time content. If the file source
-		// needs to update later, move this render call into its own nested effect.
-		const file: FileContents = {
+	function createFileContents(): FileContents {
+		return {
 			name,
 			contents: code
 		};
+	}
 
-		instance.render({
-			file,
-			containerWrapper: node
+	async function renderCode() {
+		if (!container || hasRendered || renderPromise) return;
+
+		renderPromise = (async () => {
+			const { File } = await import('@pierre/diffs');
+
+			if (!container || hasRendered) return;
+
+			instance = new File({
+				theme,
+				overflow,
+				themeType: mode.current,
+				stickyHeader,
+				disableFileHeader
+			});
+
+			instance.render({
+				file: createFileContents(),
+				containerWrapper: container
+			});
+
+			hasRendered = true;
+			observer?.disconnect();
+			observer = null;
+		})().finally(() => {
+			renderPromise = null;
 		});
 
-		// Keep the syntax theme aligned with the app mode without recreating the
-		// whole viewer instance.
-		// $effect(() => {
-		// 	instance.setThemeType(mode.current);
-		// });
-		watch(
-			() => mode.current,
-			() => {
-				instance.setThemeType(mode.current as 'dark' | 'light');
+		await renderPromise;
+	}
+
+	function destroyCode() {
+		observer?.disconnect();
+		observer = null;
+		renderPromise = null;
+		instance?.cleanUp();
+		instance = null;
+		hasRendered = false;
+	}
+
+	$effect(() => {
+		mode.current;
+		instance?.setThemeType(mode.current as 'dark' | 'light');
+	});
+
+	onMount(() => {
+		if (!container) return;
+
+		observer = new IntersectionObserver(
+			([entry]) => {
+				if (entry?.isIntersecting) {
+					renderCode();
+				}
+			},
+			{
+				threshold: 0.1
 			}
 		);
 
-		return () => {
-			instance.cleanUp();
-		};
-	};
+		observer.observe(container);
+	});
+
+	onDestroy(() => {
+		destroyCode();
+		container = null;
+	});
 </script>
 
 <div
 	class="container h-120 overflow-hidden rounded-xl border border-ink/12 bg-card dark:border-border"
 >
 	<div class="h-full overflow-y-auto rounded-lg">
-		<div {@attach renderCode}></div>
+		<div bind:this={container}></div>
 	</div>
 </div>

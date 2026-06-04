@@ -2,7 +2,7 @@
 	import { Code } from '$lib/components/ui/code';
 	import { PMCommand } from '$lib/components/ui/pm-command';
 	import Base from '$lib/components/usage/base.svelte';
-	import basicSource from '$lib/components/usage/base.svelte?raw';
+	import { usageCode } from '$lib/components/usage/code';
 </script>
 
 <div class="w-full max-w-3xl space-y-10 pb-8">
@@ -65,10 +65,10 @@
 			</p>
 		</div>
 
-		<div class="rounded-lg border border-border bg-card">
+		<div class="rounded-lg flex justify-center items-center border border-border bg-card">
 			<Base />
 		</div>
 
-		<Code name="base.svelte" code={basicSource} />
+		<Code name="base.svelte" code={usageCode.base} />
 	</section>
 </div>

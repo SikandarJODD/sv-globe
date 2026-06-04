@@ -1,23 +1,25 @@
 <script lang="ts">
-	import createGlobe from 'cobe';
-	import { type Globe } from 'cobe';
-	import { Spring, Tween } from 'svelte/motion';
-	import { onMount } from 'svelte';
+	import type { Globe } from 'cobe';
+	import { Spring } from 'svelte/motion';
+	import { onDestroy, onMount } from 'svelte';
 
 	const size = 300;
 	const baseTheta = 0.2;
 	const thetaOffsetMin = -0.4;
 	const thetaOffsetMax = 0.4;
 
-	let canvas: HTMLCanvasElement | null = $state(null);
-	let globe: Globe | null = $state(null);
+	let canvas: HTMLCanvasElement | null = null;
+	let globe: Globe | null = null;
+	let observer: IntersectionObserver | null = null;
+	let createGlobePromise: Promise<typeof import('cobe').default> | null = null;
+	let isVisible = false;
 	let isDragging = $state(false);
 
-	let frame = $state(0);
-	let autoPhi = $state(0);
-	let dragStart: { x: number; y: number; phi: number; theta: number } | null = $state(null);
-	let lastPointer: { x: number; y: number; t: number } | null = $state(null);
-	let releaseVelocity = $state({ phi: 0, theta: 0 });
+	let frame = 0;
+	let autoPhi = 0;
+	let dragStart: { x: number; y: number; phi: number; theta: number } | null = null;
+	let lastPointer: { x: number; y: number; t: number } | null = null;
+	let releaseVelocity = { phi: 0, theta: 0 };
 
 	const phiOffset = new Spring(0, {
 		stiffness: 0.12,
@@ -94,8 +96,34 @@
 		releaseVelocity = { phi: 0, theta: 0 };
 	}
 
-	onMount(() => {
+	function stopAnimation() {
+		if (!frame) return;
+		cancelAnimationFrame(frame);
+		frame = 0;
+	}
+
+	function destroyGlobe() {
+		stopAnimation();
+		globe?.destroy();
+		globe = null;
+	}
+
+	async function getCreateGlobe() {
+		createGlobePromise ??= import('cobe').then((module) => module.default);
+		return createGlobePromise;
+	}
+
+	async function startGlobe() {
 		if (!canvas) return;
+
+		if (globe) {
+			if (!frame) animate();
+			return;
+		}
+
+		const createGlobe = await getCreateGlobe();
+
+		if (!canvas || globe || !isVisible) return;
 
 		globe = createGlobe(canvas, {
 			devicePixelRatio: Math.min(window.devicePixelRatio, 2),
@@ -120,36 +148,73 @@
 			arcHeight: 0.3
 		});
 
-		const onWindowPointerMove = (event: PointerEvent) => handlePointerMove(event);
-		const onWindowPointerUp = (event: PointerEvent) => handlePointerUp(event);
+		animate();
+	}
+
+	let onWindowPointerMove: ((event: PointerEvent) => void) | null = null;
+	let onWindowPointerUp: ((event: PointerEvent) => void) | null = null;
+
+	function animate() {
+		if (!globe) {
+			frame = 0;
+			return;
+		}
+
+		if (!isDragging) {
+			autoPhi += 0.005;
+		}
+
+		globe.update({
+			phi: autoPhi + phiOffset.current,
+			theta: baseTheta + thetaOffset.current
+		});
+
+		frame = requestAnimationFrame(animate);
+	}
+
+	onMount(() => {
+		if (!canvas) return;
+
+		onWindowPointerMove = (event: PointerEvent) => handlePointerMove(event);
+		onWindowPointerUp = (event: PointerEvent) => handlePointerUp(event);
 
 		window.addEventListener('pointermove', onWindowPointerMove, { passive: true });
 		window.addEventListener('pointerup', onWindowPointerUp, { passive: true });
 		window.addEventListener('pointercancel', onWindowPointerUp, { passive: true });
 
-		function animate() {
-			// comment below code to disable auto-rotation
-			if (!isDragging) {
-				autoPhi += 0.005;
+		observer = new IntersectionObserver(([entry]) => {
+			if (!entry) return;
+			isVisible = entry.isIntersecting;
+			if (isVisible) {
+				void startGlobe();
+				return;
 			}
 
-			globe?.update({
-				phi: autoPhi + phiOffset.current,
-				theta: baseTheta + thetaOffset.current
-			});
+			stopAnimation();
+		}, { threshold: 0.1 });
 
-			frame = requestAnimationFrame(animate);
+		observer.observe(canvas);
+	});
+
+	onDestroy(() => {
+		observer?.disconnect();
+		observer = null;
+		isVisible = false;
+
+		if (onWindowPointerMove) {
+			window.removeEventListener('pointermove', onWindowPointerMove);
+			onWindowPointerMove = null;
 		}
 
-		animate();
-
-		return () => {
-			cancelAnimationFrame(frame);
-			window.removeEventListener('pointermove', onWindowPointerMove);
+		if (onWindowPointerUp) {
 			window.removeEventListener('pointerup', onWindowPointerUp);
 			window.removeEventListener('pointercancel', onWindowPointerUp);
-			globe?.destroy();
-		};
+			onWindowPointerUp = null;
+		}
+
+		handlePointerUp();
+		destroyGlobe();
+		canvas = null;
 	});
 </script>
 

@@ -1,18 +1,28 @@
 <script lang="ts">
-	import createGlobe from 'cobe';
-	import { type Globe } from 'cobe';
-	import { onMount } from 'svelte';
+	import type { Globe } from 'cobe';
+	import { onDestroy, onMount } from 'svelte';
 
 	const size = 300;
 
-	let canvas: HTMLCanvasElement | null = $state(null);
-	let globe: Globe | null = $state(null);
-	let observer: IntersectionObserver | null = $state(null);
-	let frame = $state(0);
-	let phi = $state(0);
+	let canvas: HTMLCanvasElement | null = null;
+	let globe: Globe | null = null;
+	let observer: IntersectionObserver | null = null;
+	let createGlobePromise: Promise<typeof import('cobe').default> | null = null;
+	let isVisible = false;
+	let frame = 0;
+	let phi = 0;
 
-	function createGlobeInstance() {
+	async function getCreateGlobe() {
+		createGlobePromise ??= import('cobe').then((module) => module.default);
+		return createGlobePromise;
+	}
+
+	async function createGlobeInstance() {
 		if (!canvas || globe) return;
+
+		const createGlobe = await getCreateGlobe();
+
+		if (!canvas || globe || !isVisible) return;
 
 		globe = createGlobe(canvas, {
 			// Cap DPR so high-density screens do not overload the GPU.
@@ -44,14 +54,17 @@
 		}
 
 		phi += 0.005;
-		globe?.update({ phi });
+		globe.update({ phi });
 		frame = requestAnimationFrame(animate);
 	}
 
 	function startAnimation() {
-		createGlobeInstance();
-		if (frame || !globe) return;
-		animate();
+		if (frame) return;
+
+		void createGlobeInstance().then(() => {
+			if (frame || !globe) return;
+			animate();
+		});
 	}
 
 	function stopAnimation({ destroy = false } = {}) {
@@ -63,10 +76,6 @@
 		if (destroy) {
 			globe?.destroy();
 			globe = null;
-			// console.log('Destroying globe instance to free up WebGL resources.');
-			// console.time('Destroy globe');
-			// console.timeEnd('Destroy globe');
-			// console.log('Globe instance destroyed:', globe);
 		}
 	}
 
@@ -76,14 +85,14 @@
 		observer = new IntersectionObserver(
 			([entry]) => {
 				if (!entry) return;
+				isVisible = entry.isIntersecting;
 
-				if (entry.isIntersecting) {
+				if (isVisible) {
 					startAnimation();
 					return;
 				}
 
-				// Stop the RAF loop and release the WebGL resources when off-screen.
-				stopAnimation({ destroy: true });
+				stopAnimation();
 			},
 			{
 				threshold: 0.1
@@ -96,12 +105,14 @@
 
 		observer.observe(canvas);
 		startAnimation();
+	});
 
-		return () => {
-			observer?.disconnect();
-			observer = null;
-			stopAnimation({ destroy: true });
-		};
+	onDestroy(() => {
+		observer?.disconnect();
+		observer = null;
+		isVisible = false;
+		stopAnimation({ destroy: true });
+		canvas = null;
 	});
 </script>
 
