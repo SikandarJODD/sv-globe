@@ -67,6 +67,10 @@
 	};
 </script>
 
-<div class="container">
-	<div {@attach renderCode}></div>
+<div
+	class="container h-120 overflow-hidden rounded-xl border border-ink/12 bg-card dark:border-border"
+>
+	<div class="h-full overflow-y-auto rounded-lg">
+		<div {@attach renderCode}></div>
+	</div>
 </div>

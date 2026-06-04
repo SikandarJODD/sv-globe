@@ -43,6 +43,8 @@
 	});
 </script>
 
-<div class="container">
-	<canvas bind:this={canvas}></canvas>
+<div class="container flex items-center justify-center">
+	<div>
+		<canvas bind:this={canvas}></canvas>
+	</div>
 </div>

@@ -56,7 +56,10 @@
 			<Tabs.Root bind:value={agent}>
 				<Tabs.List class="h-auto bg-transparent p-0">
 					{#each agents as pm (pm)}
-						<Tabs.Trigger value={pm} class="h-7 font-mono text-sm font-light">
+						<Tabs.Trigger
+							value={pm}
+							class="h-7 font-mono text-sm font-light hover:text-ink data-active:border-ink/20 data-active:bg-ink/8 data-active:text-ink dark:data-active:border-primary/20 dark:data-active:bg-primary/10 dark:data-active:text-primary"
+						>
 							{pm}
 						</Tabs.Trigger>
 					{/each}
@@ -67,7 +70,11 @@
 			<Tooltip.Root>
 				<Tooltip.Trigger>
 					{#snippet child({ props })}
-						<CopyButton {...props} text={commandText} class="size-6 [&_svg]:size-3">
+						<CopyButton
+							{...props}
+							text={commandText}
+							class="text-ink hover:text-ink/80 dark:text-primary dark:hover:text-primary/80 size-6 [&_svg]:size-3"
+						>
 							{#snippet icon()}
 								<ClipboardIcon />
 							{/snippet}
