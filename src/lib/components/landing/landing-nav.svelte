@@ -1,9 +1,11 @@
 <script lang="ts">
 	import MenuIcon from '@lucide/svelte/icons/menu';
-	import SunMoonIcon from '@lucide/svelte/icons/sun-moon';
+	import MoonIcon from '@lucide/svelte/icons/moon';
+	import SunIcon from '@lucide/svelte/icons/sun';
 	import XIcon from '@lucide/svelte/icons/x';
 	import { mode, toggleMode } from 'mode-watcher';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import * as Drawer from '$lib/components/ui/drawer/index.js';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
 
 	const sectionLinks = [
@@ -27,7 +29,7 @@
 	class="hidden w-full max-w-56 text-center lg:sticky lg:top-12 lg:block lg:text-left"
 >
 	<div class="flex flex-col gap-5">
-		<p class="font-gp-circle text-2xl text-ink">sv-globe</p>
+		<p class="font-gp-circle text-2xl text-ink dark:text-primary">sv-globe</p>
 
 		<div class="space-y-2">
 			{#each sectionLinks as link (link.href)}
@@ -40,7 +42,7 @@
 			{/each}
 		</div>
 
-		<Separator class="bg-ink/15" />
+		<Separator class="bg-ink/15 dark:bg-secondary" />
 
 		<div class="flex items-center justify-between gap-4">
 			<a
@@ -54,16 +56,25 @@
 
 			<Button
 				variant="ghost"
-				size="xs"
-				class="px-0 text-xs text-muted-foreground"
+				size="icon-sm"
+				class="rounded-sm text-muted-foreground"
+				aria-label={`Switch to ${mode.current === 'dark' ? 'light' : 'dark'} mode`}
 				onclick={toggleMode}
 			>
-				<SunMoonIcon />
-				{mode.current === 'dark' ? 'Light' : 'Dark'}
+				{#if mode.current === 'light'}
+					<MoonIcon />
+				{:else}
+					<SunIcon />
+				{/if}
+				<span class="sr-only">Toggle theme</span>
 			</Button>
 		</div>
 
-		<div class="border border-dashed border-ink px-4 py-3 text-sm text-ink">Sponsor my work</div>
+		<div
+			class="border border-dashed border-ink px-4 py-2.5 text-xs text-ink transition-all duration-200 dark:border-primary/30 dark:bg-card dark:text-primary dark:hover:bg-card/80"
+		>
+			Sponsor my work
+		</div>
 	</div>
 </nav>
 
@@ -78,7 +89,6 @@
 				variant="ghost"
 				size="icon-sm"
 				class="text-foreground"
-				aria-expanded={mobileOpen}
 				aria-label="Open navigation menu"
 				onclick={() => {
 					mobileOpen = true;
@@ -89,20 +99,13 @@
 		</div>
 	</div>
 
-	{#if mobileOpen}
-		<button
-			type="button"
-			class="fixed inset-0 z-40 bg-black/10 backdrop-blur-[1px]"
-			aria-label="Close navigation menu"
-			onclick={closeMobileMenu}
-		></button>
-
-		<div
-			class="fixed inset-x-0 bottom-0 z-50 border-t border-ink bg-background px-6 pt-6 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_-16px_40px_-24px_rgba(0,0,0,0.35)] sm:px-8"
+	<Drawer.Drawer bind:open={mobileOpen} direction="bottom">
+		<Drawer.DrawerContent
+			class="bg-background px-6 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:px-8"
 		>
-			<div class="mx-auto max-w-5xl space-y-5">
+			<div class="w-full space-y-5">
 				<div class="flex items-center justify-between gap-4">
-					<p class="font-gp-circle text-xl text-ink">sv-globe</p>
+					<p class="font-gp-circle text-xl text-ink dark:text-primary">sv-globe</p>
 
 					<Button
 						variant="ghost"
@@ -126,7 +129,7 @@
 					{/each}
 				</div>
 
-				<Separator class="bg-ink/15" />
+				<Separator class="bg-ink/15 dark:bg-secondary" />
 
 				<div class="flex items-center justify-between gap-4">
 					<a
@@ -140,19 +143,26 @@
 
 					<Button
 						variant="ghost"
-						size="xs"
-						class="px-0 text-xs text-muted-foreground"
+						size="icon-sm"
+						class="text-muted-foreground"
+						aria-label={`Switch to ${mode.current === 'dark' ? 'light' : 'dark'} mode`}
 						onclick={toggleMode}
 					>
-						<SunMoonIcon />
-						{mode.current === 'dark' ? 'Light' : 'Dark'}
+						{#if mode.current === 'light'}
+							<MoonIcon />
+						{:else}
+							<SunIcon />
+						{/if}
+						<span class="sr-only">Toggle theme</span>
 					</Button>
 				</div>
 
-				<div class="border border-dashed border-ink px-4 py-3 text-sm text-ink">
+				<div
+					class="border border-dashed border-ink px-4 py-3 text-sm text-ink dark:border-primary/30 dark:text-primary"
+				>
 					Sponsor my work
 				</div>
 			</div>
-		</div>
-	{/if}
+		</Drawer.DrawerContent>
+	</Drawer.Drawer>
 </div>
