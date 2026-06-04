@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Nav from '$lib/components/landing/nav/nav.svelte';
+	import Nav from '$lib/components/base/nav/nav.svelte';
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { activeElement, PressedKeys } from 'runed';
