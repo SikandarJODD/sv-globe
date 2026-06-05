@@ -1,5 +1,7 @@
 import type { Component } from 'svelte';
 
+import Polaroids from '$lib/components/example/polaroids.svelte';
+import { exampleCode } from '$lib/components/example/code';
 import {
 	Base,
 	Basic,
@@ -60,5 +62,12 @@ export const usageItems: UsageItem[] = [
 		preview: Performance,
 		code: usageCode.performance,
 		name: 'performance.svelte'
+	},
+	{
+		title: 'Polaroid Overlay Example',
+		desc: 'Combines marker anchors with image cards so you can attach richer visual callouts to locations on the globe.',
+		preview: Polaroids,
+		code: exampleCode.polaroid,
+		name: 'polaroids.svelte'
 	}
 ];
