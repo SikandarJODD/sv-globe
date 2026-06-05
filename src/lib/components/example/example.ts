@@ -1,6 +1,7 @@
 import type { Component } from 'svelte';
 
 import Cdn from '$lib/components/example/cdn.svelte';
+import Flight from '$lib/components/example/flight.svelte';
 import Polaroids from '$lib/components/example/polaroids.svelte';
 import Satellites from '$lib/components/example/satellites.svelte';
 import Sticker from '$lib/components/example/sticker.svelte';
@@ -28,6 +29,13 @@ export const exampleItems: ExampleItem[] = [
 		preview: Sticker,
 		code: exampleCode.sticker,
 		name: 'sticker.svelte'
+	},
+	{
+		title: 'Flight Globe',
+		desc: 'Combines draggable rotation with flight arcs, airport markers, and route labels derived from the shared showcase data.',
+		preview: Flight,
+		code: exampleCode.flight,
+		name: 'flight.svelte'
 	},
 	{
 		title: 'Satellite Globe',

@@ -1206,9 +1206,385 @@ const cdnCode = `<script lang="ts">
 \t}
 </style>`;
 
+const flightCode = `<script lang="ts">
+\timport { onDestroy, onMount } from 'svelte';
+\timport type { Globe } from 'cobe';
+\timport { Spring } from 'svelte/motion';
+
+\timport { flightArcs, flightMarkers, showcaseConfigs } from './showcase-data';
+
+\tconst config = showcaseConfigs.flights;
+\tconst thetaOffsetMin = -0.32;
+\tconst thetaOffsetMax = 0.28;
+\tconst airportCodeByLocation = new Map(
+\t\tflightMarkers.map(({ id, location }) => [location.join(','), id.replace('apt-', '').toUpperCase()])
+\t);
+\tconst flightRoutes = flightArcs.map((arc) => ({
+\t\t...arc,
+\t\tlabel:
+\t\t\t\`\${airportCodeByLocation.get(arc.from.join(',')) ?? 'UNK'}-\` +
+\t\t\t\`\${airportCodeByLocation.get(arc.to.join(',')) ?? 'UNK'}\`
+\t}));
+
+\tlet canvas: HTMLCanvasElement | null = null;
+\tlet globe: Globe | null = $state(null);
+\tlet observer: IntersectionObserver | null = null;
+\tlet createGlobePromise: Promise<typeof import('cobe').default> | null = null;
+\tlet frame = 0;
+\tlet isVisible = false;
+\tlet isDragging = $state(false);
+\tlet autoPhi = 0;
+\tlet dragStart: { x: number; y: number; phi: number; theta: number } | null = null;
+\tlet lastPointer: { x: number; y: number; t: number } | null = null;
+\tlet releaseVelocity = { phi: 0, theta: 0 };
+
+\tconst phiOffset = new Spring(0, {
+\t\tstiffness: 0.11,
+\t\tdamping: 0.78,
+\t\tprecision: 0.0001
+\t});
+
+\tconst thetaOffset = new Spring(0, {
+\t\tstiffness: 0.11,
+\t\tdamping: 0.78,
+\t\tprecision: 0.0001
+\t});
+
+\tfunction clamp(value: number, min: number, max: number) {
+\t\treturn Math.min(max, Math.max(min, value));
+\t}
+
+\tfunction stopAnimation() {
+\t\tif (!frame) return;
+
+\t\tcancelAnimationFrame(frame);
+\t\tframe = 0;
+\t}
+
+\tfunction destroyGlobe() {
+\t\tstopAnimation();
+\t\tglobe?.destroy();
+\t\tglobe = null;
+\t}
+
+\tfunction animate() {
+\t\tif (!globe) {
+\t\t\tframe = 0;
+\t\t\treturn;
+\t\t}
+
+\t\tif (!isDragging) autoPhi += 0.003;
+
+\t\tglobe.update({
+\t\t\tphi: autoPhi + phiOffset.current,
+\t\t\ttheta: config.theta + thetaOffset.current
+\t\t});
+
+\t\tframe = requestAnimationFrame(animate);
+\t}
+
+\tfunction handlePointerDown(event: PointerEvent) {
+\t\tdragStart = {
+\t\t\tx: event.clientX,
+\t\t\ty: event.clientY,
+\t\t\tphi: phiOffset.target,
+\t\t\ttheta: thetaOffset.target
+\t\t};
+\t\tlastPointer = { x: event.clientX, y: event.clientY, t: performance.now() };
+\t\treleaseVelocity = { phi: 0, theta: 0 };
+\t\tisDragging = true;
+\t\tcanvas?.setPointerCapture?.(event.pointerId);
+\t}
+
+\tfunction handlePointerMove(event: PointerEvent) {
+\t\tif (!dragStart) return;
+
+\t\tconst nextPhi = dragStart.phi + (event.clientX - dragStart.x) / 340;
+\t\tconst nextTheta = clamp(
+\t\t\tdragStart.theta + (event.clientY - dragStart.y) / 1150,
+\t\t\tthetaOffsetMin,
+\t\t\tthetaOffsetMax
+\t\t);
+
+\t\tvoid phiOffset.set(nextPhi, { instant: true });
+\t\tvoid thetaOffset.set(nextTheta, { instant: true });
+
+\t\tconst now = performance.now();
+\t\tif (lastPointer) {
+\t\t\tconst dt = Math.max(now - lastPointer.t, 1);
+\t\t\tconst maxVelocity = 0.12;
+
+\t\t\treleaseVelocity = {
+\t\t\t\tphi: clamp(((event.clientX - lastPointer.x) / dt) * 0.24, -maxVelocity, maxVelocity),
+\t\t\t\ttheta: clamp(((event.clientY - lastPointer.y) / dt) * 0.06, -maxVelocity, maxVelocity)
+\t\t\t};
+\t\t}
+
+\t\tlastPointer = { x: event.clientX, y: event.clientY, t: now };
+\t}
+
+\tfunction handlePointerUp(event?: PointerEvent) {
+\t\tif (!dragStart) return;
+
+\t\tisDragging = false;
+\t\tdragStart = null;
+\t\tlastPointer = null;
+
+\t\tif (event && canvas?.hasPointerCapture(event.pointerId)) {
+\t\t\tcanvas.releasePointerCapture(event.pointerId);
+\t\t}
+
+\t\tvoid phiOffset.set(phiOffset.target + releaseVelocity.phi * 18);
+\t\tvoid thetaOffset.set(
+\t\t\tclamp(thetaOffset.target + releaseVelocity.theta * 14, thetaOffsetMin, thetaOffsetMax)
+\t\t);
+
+\t\treleaseVelocity = { phi: 0, theta: 0 };
+\t}
+
+\tasync function getCreateGlobe() {
+\t\tcreateGlobePromise ??= import('cobe').then((module) => module.default);
+\t\treturn createGlobePromise;
+\t}
+
+\tasync function startGlobe() {
+\t\tif (!canvas) return;
+
+\t\tif (globe) {
+\t\t\tif (!frame) animate();
+\t\t\treturn;
+\t\t}
+
+\t\tconst createGlobe = await getCreateGlobe();
+\t\tif (!canvas || globe || !isVisible) return;
+
+\t\tconst devicePixelRatio = Math.min(window.devicePixelRatio, 2);
+\t\tconst renderedSize = Math.max(320, Math.round(canvas.getBoundingClientRect().width * devicePixelRatio));
+
+\t\tglobe = createGlobe(canvas, {
+\t\t\tdevicePixelRatio,
+\t\t\twidth: renderedSize,
+\t\t\theight: renderedSize,
+\t\t\tphi: autoPhi + phiOffset.current,
+\t\t\ttheta: config.theta + thetaOffset.current,
+\t\t\tdark: config.dark,
+\t\t\tdiffuse: 1.3,
+\t\t\tmapSamples: 15000,
+\t\t\tmapBrightness: config.mapBrightness,
+\t\t\tbaseColor: config.baseColor,
+\t\t\tmarkerColor: config.markerColor,
+\t\t\tglowColor: [0.88, 0.93, 1],
+\t\t\tmarkers: flightMarkers.map(({ id, location }) => ({
+\t\t\t\tid,
+\t\t\t\tlocation,
+\t\t\t\tsize: config.markerSize
+\t\t\t})),
+\t\t\tmarkerElevation: config.markerElevation,
+\t\t\tarcs: flightRoutes.map(({ from, id, to }) => ({ from, id, to })),
+\t\t\tarcColor: config.arcColor,
+\t\t\tarcWidth: 0.55,
+\t\t\tarcHeight: 0.18,
+\t\t\topacity: 0.88
+\t\t});
+
+\t\tanimate();
+\t}
+
+\tlet onWindowPointerMove: ((event: PointerEvent) => void) | null = null;
+\tlet onWindowPointerUp: ((event: PointerEvent) => void) | null = null;
+
+\tonMount(() => {
+\t\tif (!canvas) return;
+
+\t\tonWindowPointerMove = (event: PointerEvent) => handlePointerMove(event);
+\t\tonWindowPointerUp = (event: PointerEvent) => handlePointerUp(event);
+
+\t\twindow.addEventListener('pointermove', onWindowPointerMove, { passive: true });
+\t\twindow.addEventListener('pointerup', onWindowPointerUp, { passive: true });
+\t\twindow.addEventListener('pointercancel', onWindowPointerUp, { passive: true });
+
+\t\tobserver = new IntersectionObserver(([entry]) => {
+\t\t\tif (!entry) return;
+
+\t\t\tisVisible = entry.isIntersecting;
+\t\t\tif (isVisible) {
+\t\t\t\tvoid startGlobe();
+\t\t\t\treturn;
+\t\t\t}
+
+\t\t\tstopAnimation();
+\t\t}, { threshold: 0.15 });
+
+\t\tobserver.observe(canvas);
+\t});
+
+\tonDestroy(() => {
+\t\tobserver?.disconnect();
+
+\t\tif (onWindowPointerMove) {
+\t\t\twindow.removeEventListener('pointermove', onWindowPointerMove);
+\t\t\tonWindowPointerMove = null;
+\t\t}
+
+\t\tif (onWindowPointerUp) {
+\t\t\twindow.removeEventListener('pointerup', onWindowPointerUp);
+\t\t\twindow.removeEventListener('pointercancel', onWindowPointerUp);
+\t\t\tonWindowPointerUp = null;
+\t\t}
+
+\t\thandlePointerUp();
+\t\tdestroyGlobe();
+\t});
+</script>
+
+<div class="globe">
+\t<canvas
+\t\tbind:this={canvas}
+\t\tclass="globe-canvas"
+\t\tclass:ready={!!globe}
+\t\tclass:dragging={isDragging}
+\t\tonpointerdown={handlePointerDown}
+\t></canvas>
+
+\t{#each flightMarkers as marker (marker.id)}
+\t\t<div
+\t\t\tclass="airport"
+\t\t\tstyle={\`position-anchor: --cobe-\${marker.id}; --marker-visible: var(--cobe-visible-\${marker.id}, 0);\`}
+\t\t>
+\t\t\t<span class="airport-dot"></span>
+\t\t\t<span class="airport-label">{marker.id.replace('apt-', '').toUpperCase()}</span>
+\t\t</div>
+\t{/each}
+
+\t{#each flightRoutes as route, index (route.id)}
+\t\t<div
+\t\t\tclass="route"
+\t\t\tstyle={\`position-anchor: --cobe-arc-\${route.id}; --arc-visible: var(--cobe-visible-arc-\${route.id}, 0); --route-delay: \${index * 160}ms;\`}
+\t\t>
+\t\t\t<span class="route-plane">AIR</span>
+\t\t\t<span class="route-label">{route.label}</span>
+\t\t</div>
+\t{/each}
+</div>
+
+<style>
+\t.globe {
+\t\tposition: relative;
+\t\twidth: min(100%, 32.5rem);
+\t\taspect-ratio: 1;
+\t\tuser-select: none;
+\t}
+
+\t.globe-canvas {
+\t\twidth: 100%;
+\t\theight: 100%;
+\t\taspect-ratio: 1;
+\t\tborder-radius: 9999px;
+\t\tcursor: grab;
+\t\topacity: 0;
+\t\ttouch-action: none;
+\t\ttransition: opacity 0.8s ease;
+\t}
+
+\t.globe-canvas.ready {
+\t\topacity: 1;
+\t}
+
+\t.globe-canvas.dragging {
+\t\tcursor: grabbing;
+\t}
+
+\t.airport {
+\t\tposition: absolute;
+\t\tbottom: anchor(top);
+\t\tleft: anchor(center);
+\t\tdisplay: inline-flex;
+\t\talign-items: center;
+\t\tgap: 0.35rem;
+\t\ttranslate: -50% 0;
+\t\topacity: var(--marker-visible);
+\t\tfilter: blur(calc((1 - var(--marker-visible)) * 8px));
+\t\ttransition:
+\t\t\topacity 0.25s ease,
+\t\t\tfilter 0.25s ease;
+\t\tpointer-events: none;
+\t}
+
+\t.airport-dot {
+\t\twidth: 0.45rem;
+\t\theight: 0.45rem;
+\t\tborder-radius: 9999px;
+\t\tbackground: #2563eb;
+\t\tbox-shadow: 0 0 0 3px rgb(255 255 255 / 0.8);
+\t}
+
+\t.airport-label {
+\t\tborder-radius: 9999px;
+\t\tbackground: rgb(255 255 255 / 0.95);
+\t\tbox-shadow: 0 10px 20px rgb(15 23 42 / 0.12);
+\t\tcolor: #0f172a;
+\t\tfont-family: monospace;
+\t\tfont-size: 0.58rem;
+\t\tfont-weight: 600;
+\t\tletter-spacing: 0.08em;
+\t\tpadding: 0.25rem 0.45rem;
+\t}
+
+\t.route {
+\t\tposition: absolute;
+\t\tbottom: anchor(top);
+\t\tleft: anchor(center);
+\t\tdisplay: inline-flex;
+\t\talign-items: center;
+\t\tgap: 0.4rem;
+\t\ttranslate: -50% -10%;
+\t\tborder-radius: 9999px;
+\t\tbackground: linear-gradient(135deg, rgb(15 23 42 / 0.96), rgb(37 99 235 / 0.92));
+\t\tbox-shadow: 0 14px 30px rgb(15 23 42 / 0.22);
+\t\tcolor: white;
+\t\topacity: var(--arc-visible);
+\t\tfilter: blur(calc((1 - var(--arc-visible)) * 8px));
+\t\tpadding: 0.35rem 0.65rem;
+\t\tpointer-events: none;
+\t\twhite-space: nowrap;
+\t\ttransition:
+\t\t\topacity 0.25s ease,
+\t\t\tfilter 0.25s ease;
+\t\tanimation: flight-float 3.2s ease-in-out infinite;
+\t\tanimation-delay: var(--route-delay);
+\t}
+
+\t.route-plane {
+\t\tdisplay: inline-grid;
+\t\twidth: 1.3rem;
+\t\theight: 1.3rem;
+\t\tplace-items: center;
+\t\tborder-radius: 9999px;
+\t\tbackground: rgb(255 255 255 / 0.18);
+\t\tfont-size: 0.44rem;
+\t\tfont-weight: 700;
+\t\tletter-spacing: 0.08em;
+\t\tline-height: 1;
+\t}
+
+\t.route-label {
+\t\tfont-family: monospace;
+\t\tfont-size: 0.62rem;
+\t\tfont-weight: 600;
+\t\tletter-spacing: 0.08em;
+\t}
+
+\t@keyframes flight-float {
+\t\t0%,
+\t\t100% { transform: translateY(0); }
+\t\t50% { transform: translateY(-5px); }
+\t}
+</style>`;
+
 export const exampleCode = {
 	sticker: stickerCode,
 	polaroid: polaroidCode,
 	satellites: satellitesCode,
-	cdn: cdnCode
+	cdn: cdnCode,
+	flight: flightCode
 } as const;
