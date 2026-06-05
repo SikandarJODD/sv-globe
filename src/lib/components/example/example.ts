@@ -1,5 +1,6 @@
 import type { Component } from 'svelte';
 
+import Cdn from '$lib/components/example/cdn.svelte';
 import Polaroids from '$lib/components/example/polaroids.svelte';
 import Sticker from '$lib/components/example/sticker.svelte';
 import { exampleCode } from '$lib/components/example/code';
@@ -13,6 +14,13 @@ export type ExampleItem = {
 };
 
 export const exampleItems: ExampleItem[] = [
+	{
+		title: 'CDN Globe',
+		desc: 'Shows an edge network with draggable rotation, animated node overlays, and route arcs between regions.',
+		preview: Cdn,
+		code: exampleCode.cdn,
+		name: 'cdn.svelte'
+	},
 	{
 		title: 'Sticker Globe',
 		desc: 'Anchors emoji stickers to globe markers so you can mix COBE rendering with HTML overlays.',

@@ -544,7 +544,312 @@ const polaroidCode = `<script lang="ts">
 \t}
 </style>`;
 
+const cdnCode = `<script lang="ts">
+\timport createGlobe from 'cobe';
+\timport type { Globe } from 'cobe';
+\timport { onMount } from 'svelte';
+\timport { Spring } from 'svelte/motion';
+
+\tconst config = {
+\t\ttheta: 0.2,
+\t\tdark: 0,
+\t\tmapBrightness: 10,
+\t\tmarkerColor: [0, 0, 0] as [number, number, number],
+\t\tbaseColor: [1, 1, 1] as [number, number, number],
+\t\tarcColor: [0, 0, 0] as [number, number, number],
+\t\tmarkerSize: 0.012,
+\t\tmarkerElevation: 0.02
+\t};
+\tconst thetaOffsetMin = -0.32;
+\tconst thetaOffsetMax = 0.28;
+
+\tconst cdnMarkers = [
+\t\t{ id: 'cdn-iad', location: [38.95, -77.45] as [number, number], region: 'iad1' },
+\t\t{ id: 'cdn-sfo', location: [37.62, -122.38] as [number, number], region: 'sfo1' },
+\t\t{ id: 'cdn-cdg', location: [49.01, 2.55] as [number, number], region: 'cdg1' },
+\t\t{ id: 'cdn-hnd', location: [35.55, 139.78] as [number, number], region: 'hnd1' }
+\t];
+
+\tconst cdnArcs = [
+\t\t{ id: 'cdn-arc-1', from: [38.95, -77.45] as [number, number], to: [49.01, 2.55] as [number, number], traffic: '2.4 TB/s' },
+\t\t{ id: 'cdn-arc-2', from: [37.62, -122.38] as [number, number], to: [35.55, 139.78] as [number, number], traffic: '1.8 TB/s' },
+\t\t{ id: 'cdn-arc-3', from: [49.01, 2.55] as [number, number], to: [1.36, 103.99] as [number, number], traffic: '1.2 TB/s' }
+\t];
+
+\tlet canvas: HTMLCanvasElement | null = null;
+\tlet globe: Globe | null = $state(null);
+\tlet frame = 0;
+\tlet isDragging = $state(false);
+\tlet autoPhi = 0;
+\tlet dragStart: { x: number; y: number; phi: number; theta: number } | null = null;
+\tlet lastPointer: { x: number; y: number; t: number } | null = null;
+\tlet releaseVelocity = { phi: 0, theta: 0 };
+
+\tconst phiOffset = new Spring(0, { stiffness: 0.11, damping: 0.78, precision: 0.0001 });
+\tconst thetaOffset = new Spring(0, { stiffness: 0.11, damping: 0.78, precision: 0.0001 });
+
+\tfunction clamp(value: number, min: number, max: number) {
+\t\treturn Math.min(max, Math.max(min, value));
+\t}
+
+\tfunction animate() {
+\t\tif (!isDragging) autoPhi += 0.0028;
+
+\t\tglobe?.update({
+\t\t\tphi: autoPhi + phiOffset.current,
+\t\t\ttheta: config.theta + thetaOffset.current
+\t\t});
+
+\t\tframe = requestAnimationFrame(animate);
+\t}
+
+\tfunction handlePointerDown(event: PointerEvent) {
+\t\tdragStart = {
+\t\t\tx: event.clientX,
+\t\t\ty: event.clientY,
+\t\t\tphi: phiOffset.target,
+\t\t\ttheta: thetaOffset.target
+\t\t};
+\t\tlastPointer = { x: event.clientX, y: event.clientY, t: performance.now() };
+\t\treleaseVelocity = { phi: 0, theta: 0 };
+\t\tisDragging = true;
+\t\tcanvas?.setPointerCapture?.(event.pointerId);
+\t}
+
+\tfunction handlePointerMove(event: PointerEvent) {
+\t\tif (!dragStart) return;
+
+\t\tconst nextPhi = dragStart.phi + (event.clientX - dragStart.x) / 340;
+\t\tconst nextTheta = clamp(
+\t\t\tdragStart.theta + (event.clientY - dragStart.y) / 1150,
+\t\t\tthetaOffsetMin,
+\t\t\tthetaOffsetMax
+\t\t);
+
+\t\tvoid phiOffset.set(nextPhi, { instant: true });
+\t\tvoid thetaOffset.set(nextTheta, { instant: true });
+
+\t\tconst now = performance.now();
+\t\tif (lastPointer) {
+\t\t\tconst dt = Math.max(now - lastPointer.t, 1);
+\t\t\tconst maxVelocity = 0.12;
+
+\t\t\treleaseVelocity = {
+\t\t\t\tphi: clamp(((event.clientX - lastPointer.x) / dt) * 0.24, -maxVelocity, maxVelocity),
+\t\t\t\ttheta: clamp(((event.clientY - lastPointer.y) / dt) * 0.06, -maxVelocity, maxVelocity)
+\t\t\t};
+\t\t}
+
+\t\tlastPointer = { x: event.clientX, y: event.clientY, t: now };
+\t}
+
+\tfunction handlePointerUp(event?: PointerEvent) {
+\t\tif (!dragStart) return;
+
+\t\tisDragging = false;
+\t\tdragStart = null;
+\t\tlastPointer = null;
+
+\t\tif (event && canvas?.hasPointerCapture(event.pointerId)) {
+\t\t\tcanvas.releasePointerCapture(event.pointerId);
+\t\t}
+
+\t\tvoid phiOffset.set(phiOffset.target + releaseVelocity.phi * 18);
+\t\tvoid thetaOffset.set(
+\t\t\tclamp(thetaOffset.target + releaseVelocity.theta * 14, thetaOffsetMin, thetaOffsetMax)
+\t\t);
+\t\treleaseVelocity = { phi: 0, theta: 0 };
+\t}
+
+\tonMount(() => {
+\t\tif (!canvas) return;
+
+\t\tconst onPointerMove = (event: PointerEvent) => handlePointerMove(event);
+\t\tconst onPointerUp = (event: PointerEvent) => handlePointerUp(event);
+
+\t\twindow.addEventListener('pointermove', onPointerMove, { passive: true });
+\t\twindow.addEventListener('pointerup', onPointerUp, { passive: true });
+\t\twindow.addEventListener('pointercancel', onPointerUp, { passive: true });
+
+\t\tglobe = createGlobe(canvas, {
+\t\t\tdevicePixelRatio: Math.min(window.devicePixelRatio, 2),
+\t\t\twidth: 320,
+\t\t\theight: 320,
+\t\t\tphi: autoPhi + phiOffset.current,
+\t\t\ttheta: config.theta + thetaOffset.current,
+\t\t\tdark: config.dark,
+\t\t\tdiffuse: 1.35,
+\t\t\tmapSamples: 14000,
+\t\t\tmapBrightness: config.mapBrightness,
+\t\t\tbaseColor: config.baseColor,
+\t\t\tmarkerColor: config.markerColor,
+\t\t\tglowColor: [0.95, 0.95, 0.95],
+\t\t\tmarkers: cdnMarkers.map(({ id, location }) => ({ id, location, size: config.markerSize })),
+\t\t\tmarkerElevation: config.markerElevation,
+\t\t\tarcs: cdnArcs.map(({ id, from, to }) => ({ id, from, to })),
+\t\t\tarcColor: config.arcColor,
+\t\t\tarcWidth: 0.45,
+\t\t\tarcHeight: 0.16
+\t\t});
+
+\t\tanimate();
+
+\t\treturn () => {
+\t\t\twindow.removeEventListener('pointermove', onPointerMove);
+\t\t\twindow.removeEventListener('pointerup', onPointerUp);
+\t\t\twindow.removeEventListener('pointercancel', onPointerUp);
+\t\t\thandlePointerUp();
+\t\t\tcancelAnimationFrame(frame);
+\t\t\tglobe?.destroy();
+\t\t};
+\t});
+</script>
+
+<div class="globe">
+\t<canvas
+\t\tbind:this={canvas}
+\t\tclass="globe-canvas"
+\t\tclass:dragging={isDragging}
+\t\tonpointerdown={handlePointerDown}
+\t></canvas>
+
+\t{#each cdnMarkers as marker (marker.id)}
+\t\t<div
+\t\t\tclass="cdn-node"
+\t\t\tstyle={\`position-anchor: --cobe-\${marker.id}; --marker-visible: var(--cobe-visible-\${marker.id}, 0);\`}
+\t\t>
+\t\t\t<div class="cdn-pyramid">
+\t\t\t\t<div class="cdn-pyramid-face"></div>
+\t\t\t\t<div class="cdn-pyramid-face"></div>
+\t\t\t\t<div class="cdn-pyramid-face"></div>
+\t\t\t\t<div class="cdn-pyramid-face"></div>
+\t\t\t</div>
+\t\t\t<span>{marker.region}</span>
+\t\t</div>
+\t{/each}
+
+\t{#each cdnArcs as arc (arc.id)}
+\t\t<div
+\t\t\tclass="cdn-arc-label"
+\t\t\tstyle={\`position-anchor: --cobe-arc-\${arc.id}; --arc-visible: var(--cobe-visible-arc-\${arc.id}, 0);\`}
+\t\t>
+\t\t\t{arc.traffic}
+\t\t</div>
+\t{/each}
+</div>
+
+<style>
+\t.globe {
+\t\tposition: relative;
+\t\twidth: 320px;
+\t\theight: 320px;
+\t}
+
+\t.globe-canvas {
+\t\tdisplay: block;
+\t\twidth: 100%;
+\t\theight: 100%;
+\t\tborder-radius: 9999px;
+\t\tcursor: grab;
+\t\ttouch-action: none;
+\t}
+
+\t.globe-canvas.dragging,
+\t.globe-canvas:active {
+\t\tcursor: grabbing;
+\t}
+
+\t.cdn-node {
+\t\tposition: absolute;
+\t\tbottom: anchor(top);
+\t\tleft: anchor(center);
+\t\ttranslate: -50% 0;
+\t\tdisplay: flex;
+\t\tflex-direction: column;
+\t\talign-items: center;
+\t\tgap: 6px;
+\t\topacity: var(--marker-visible);
+\t\tfilter: blur(calc((1 - var(--marker-visible)) * 8px));
+\t\tpointer-events: none;
+\t}
+
+\t.cdn-pyramid {
+\t\tposition: relative;
+\t\twidth: 12px;
+\t\theight: 12px;
+\t\ttransform-style: preserve-3d;
+\t\tanimation: pyramid-spin 4s linear infinite;
+\t}
+
+\t.cdn-pyramid-face {
+\t\tposition: absolute;
+\t\ttop: 0;
+\t\tleft: -0.5px;
+\t\twidth: 0;
+\t\theight: 0;
+\t\tborder-right: 6.5px solid transparent;
+\t\tborder-bottom: 13px solid #000;
+\t\tborder-left: 6.5px solid transparent;
+\t\ttransform-origin: center bottom;
+\t}
+
+\t.cdn-pyramid-face:nth-child(1) {
+\t\ttransform: rotateY(0deg) translateZ(4px) rotateX(19.5deg);
+\t\tborder-bottom-color: #111;
+\t}
+
+\t.cdn-pyramid-face:nth-child(2) {
+\t\ttransform: rotateY(120deg) translateZ(4px) rotateX(19.5deg);
+\t\tborder-bottom-color: #333;
+\t}
+
+\t.cdn-pyramid-face:nth-child(3) {
+\t\ttransform: rotateY(240deg) translateZ(4px) rotateX(19.5deg);
+\t\tborder-bottom-color: #555;
+\t}
+
+\t.cdn-pyramid-face:nth-child(4) {
+\t\ttransform: rotateX(-90deg) rotateZ(60deg) translateY(4px);
+\t\tborder-bottom-color: #222;
+\t}
+
+\t.cdn-node span {
+\t\tborder-radius: 999px;
+\t\tbackground: rgb(255 255 255 / 0.96);
+\t\tbox-shadow: 0 6px 18px rgb(15 23 42 / 0.12);
+\t\tfont-size: 0.55rem;
+\t\tfont-family: monospace;
+\t\tletter-spacing: 0.05em;
+\t\tpadding: 2px 6px;
+\t\twhite-space: nowrap;
+\t}
+
+\t.cdn-arc-label {
+\t\tposition: absolute;
+\t\tbottom: anchor(top);
+\t\tleft: anchor(center);
+\t\ttranslate: -50% 0;
+\t\tborder-radius: 999px;
+\t\tbackground: rgb(17 17 17 / 0.94);
+\t\tcolor: white;
+\t\tfont-size: 0.5rem;
+\t\tfont-family: monospace;
+\t\tletter-spacing: 0.04em;
+\t\topacity: var(--arc-visible);
+\t\tfilter: blur(calc((1 - var(--arc-visible)) * 8px));
+\t\tpadding: 3px 8px;
+\t\tpointer-events: none;
+\t\twhite-space: nowrap;
+\t}
+
+\t@keyframes pyramid-spin {
+\t\t0% { transform: rotateX(20deg) rotateY(0deg); }
+\t\t100% { transform: rotateX(20deg) rotateY(360deg); }
+\t}
+</style>`;
+
 export const exampleCode = {
 	sticker: stickerCode,
-	polaroid: polaroidCode
+	polaroid: polaroidCode,
+	cdn: cdnCode
 } as const;
