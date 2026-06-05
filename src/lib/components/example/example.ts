@@ -2,6 +2,7 @@ import type { Component } from 'svelte';
 
 import Cdn from '$lib/components/example/cdn.svelte';
 import Polaroids from '$lib/components/example/polaroids.svelte';
+import Satellites from '$lib/components/example/satellites.svelte';
 import Sticker from '$lib/components/example/sticker.svelte';
 import { exampleCode } from '$lib/components/example/code';
 
@@ -27,6 +28,13 @@ export const exampleItems: ExampleItem[] = [
 		preview: Sticker,
 		code: exampleCode.sticker,
 		name: 'sticker.svelte'
+	},
+	{
+		title: 'Satellite Globe',
+		desc: 'Pins animated satellite beacons to elevated markers so the globe reads like a live orbital network.',
+		preview: Satellites,
+		code: exampleCode.satellites,
+		name: 'satellites.svelte'
 	},
 	{
 		title: 'Polaroid Globe',

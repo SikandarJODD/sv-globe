@@ -544,6 +544,364 @@ const polaroidCode = `<script lang="ts">
 \t}
 </style>`;
 
+const satellitesCode = `<script lang="ts">
+\timport { onDestroy, onMount } from 'svelte';
+\timport type { Globe } from 'cobe';
+\timport { Spring } from 'svelte/motion';
+
+\tconst config = {
+\t\ttheta: 0.2,
+\t\tdark: 0.01,
+\t\tmapBrightness: 9,
+\t\tmarkerColor: [0.9, 0.9, 0.9] as [number, number, number],
+\t\tbaseColor: [0.95, 0.95, 0.95] as [number, number, number],
+\t\tmarkerSize: 0.03,
+\t\tmarkerElevation: 0.15
+\t};
+
+\tconst satelliteMarkers = [
+\t\t{ id: 'sat-1', location: [45, -120] as [number, number] },
+\t\t{ id: 'sat-2', location: [30, 45] as [number, number] },
+\t\t{ id: 'sat-3', location: [-15, 100] as [number, number] },
+\t\t{ id: 'sat-4', location: [60, -30] as [number, number] },
+\t\t{ id: 'sat-5', location: [-40, -60] as [number, number] },
+\t\t{ id: 'sat-6', location: [10, 150] as [number, number] },
+\t\t{ id: 'sat-7', location: [55, 80] as [number, number] },
+\t\t{ id: 'sat-8', location: [-25, 20] as [number, number] }
+\t];
+
+\tconst thetaOffsetMin = -0.35;
+\tconst thetaOffsetMax = 0.3;
+
+\tlet canvas: HTMLCanvasElement | null = null;
+\tlet globe: Globe | null = null;
+\tlet observer: IntersectionObserver | null = null;
+\tlet createGlobePromise: Promise<typeof import('cobe').default> | null = null;
+\tlet frame = 0;
+\tlet isVisible = false;
+\tlet isDragging = false;
+\tlet autoPhi = 0;
+\tlet dragStart: { x: number; y: number; phi: number; theta: number } | null = null;
+\tlet lastPointer: { x: number; y: number; t: number } | null = null;
+\tlet releaseVelocity = { phi: 0, theta: 0 };
+
+\tconst phiOffset = new Spring(0, {
+\t\tstiffness: 0.11,
+\t\tdamping: 0.76,
+\t\tprecision: 0.0001
+\t});
+
+\tconst thetaOffset = new Spring(0, {
+\t\tstiffness: 0.11,
+\t\tdamping: 0.76,
+\t\tprecision: 0.0001
+\t});
+
+\tfunction stopAnimation() {
+\t\tif (!frame) return;
+
+\t\tcancelAnimationFrame(frame);
+\t\tframe = 0;
+\t}
+
+\tfunction destroyGlobe() {
+\t\tstopAnimation();
+\t\tglobe?.destroy();
+\t\tglobe = null;
+\t}
+
+\tfunction animate() {
+\t\tif (!globe) {
+\t\t\tframe = 0;
+\t\t\treturn;
+\t\t}
+
+\t\tif (!isDragging) autoPhi += 0.0027;
+
+\t\tglobe.update({
+\t\t\tphi: autoPhi + phiOffset.current,
+\t\t\ttheta: config.theta + thetaOffset.current
+\t\t});
+
+\t\tframe = requestAnimationFrame(animate);
+\t}
+
+\tfunction clamp(value: number, min: number, max: number) {
+\t\treturn Math.min(max, Math.max(min, value));
+\t}
+
+\tfunction handlePointerDown(event: PointerEvent) {
+\t\tdragStart = {
+\t\t\tx: event.clientX,
+\t\t\ty: event.clientY,
+\t\t\tphi: phiOffset.target,
+\t\t\ttheta: thetaOffset.target
+\t\t};
+\t\tlastPointer = { x: event.clientX, y: event.clientY, t: performance.now() };
+\t\treleaseVelocity = { phi: 0, theta: 0 };
+\t\tisDragging = true;
+\t\tcanvas?.setPointerCapture?.(event.pointerId);
+\t}
+
+\tfunction handlePointerMove(event: PointerEvent) {
+\t\tif (!dragStart) return;
+
+\t\tconst nextPhi = dragStart.phi + (event.clientX - dragStart.x) / 340;
+\t\tconst nextTheta = clamp(
+\t\t\tdragStart.theta + (event.clientY - dragStart.y) / 1100,
+\t\t\tthetaOffsetMin,
+\t\t\tthetaOffsetMax
+\t\t);
+
+\t\tvoid phiOffset.set(nextPhi, { instant: true });
+\t\tvoid thetaOffset.set(nextTheta, { instant: true });
+
+\t\tconst now = performance.now();
+\t\tif (lastPointer) {
+\t\t\tconst dt = Math.max(now - lastPointer.t, 1);
+\t\t\tconst maxVelocity = 0.12;
+
+\t\t\treleaseVelocity = {
+\t\t\t\tphi: clamp(((event.clientX - lastPointer.x) / dt) * 0.24, -maxVelocity, maxVelocity),
+\t\t\t\ttheta: clamp(((event.clientY - lastPointer.y) / dt) * 0.06, -maxVelocity, maxVelocity)
+\t\t\t};
+\t\t}
+
+\t\tlastPointer = { x: event.clientX, y: event.clientY, t: now };
+\t}
+
+\tfunction handlePointerUp(event?: PointerEvent) {
+\t\tif (!dragStart) return;
+
+\t\tisDragging = false;
+\t\tdragStart = null;
+\t\tlastPointer = null;
+
+\t\tif (event && canvas?.hasPointerCapture(event.pointerId)) {
+\t\t\tcanvas.releasePointerCapture(event.pointerId);
+\t\t}
+
+\t\tvoid phiOffset.set(phiOffset.target + releaseVelocity.phi * 18);
+\t\tvoid thetaOffset.set(
+\t\t\tclamp(thetaOffset.target + releaseVelocity.theta * 12, thetaOffsetMin, thetaOffsetMax)
+\t\t);
+
+\t\treleaseVelocity = { phi: 0, theta: 0 };
+\t}
+
+\tasync function getCreateGlobe() {
+\t\tcreateGlobePromise ??= import('cobe').then((module) => module.default);
+\t\treturn createGlobePromise;
+\t}
+
+\tasync function startGlobe() {
+\t\tif (!canvas) return;
+
+\t\tif (globe) {
+\t\t\tif (!frame) animate();
+\t\t\treturn;
+\t\t}
+
+\t\tconst createGlobe = await getCreateGlobe();
+\t\tif (!canvas || globe || !isVisible) return;
+
+\t\tconst devicePixelRatio = Math.min(window.devicePixelRatio, 2);
+\t\tconst renderedSize = Math.max(320, Math.round(canvas.getBoundingClientRect().width * devicePixelRatio));
+
+\t\tglobe = createGlobe(canvas, {
+\t\t\tdevicePixelRatio,
+\t\t\twidth: renderedSize,
+\t\t\theight: renderedSize,
+\t\t\tphi: autoPhi + phiOffset.current,
+\t\t\ttheta: config.theta + thetaOffset.current,
+\t\t\tdark: config.dark,
+\t\t\tdiffuse: 1.45,
+\t\t\tmapSamples: 15000,
+\t\t\tmapBrightness: config.mapBrightness,
+\t\t\tbaseColor: config.baseColor,
+\t\t\tmarkerColor: config.markerColor,
+\t\t\tglowColor: [0.82, 0.93, 1],
+\t\t\tmarkers: satelliteMarkers.map(({ id, location }) => ({
+\t\t\t\tid,
+\t\t\t\tlocation,
+\t\t\t\tsize: config.markerSize
+\t\t\t})),
+\t\t\tmarkerElevation: config.markerElevation,
+\t\t\topacity: 0.92
+\t\t});
+
+\t\tanimate();
+\t}
+
+\tlet onWindowPointerMove: ((event: PointerEvent) => void) | null = null;
+\tlet onWindowPointerUp: ((event: PointerEvent) => void) | null = null;
+
+\tonMount(() => {
+\t\tif (!canvas) return;
+
+\t\tonWindowPointerMove = (event: PointerEvent) => handlePointerMove(event);
+\t\tonWindowPointerUp = (event: PointerEvent) => handlePointerUp(event);
+
+\t\twindow.addEventListener('pointermove', onWindowPointerMove, { passive: true });
+\t\twindow.addEventListener('pointerup', onWindowPointerUp, { passive: true });
+\t\twindow.addEventListener('pointercancel', onWindowPointerUp, { passive: true });
+
+\t\tobserver = new IntersectionObserver(([entry]) => {
+\t\t\tif (!entry) return;
+
+\t\t\tisVisible = entry.isIntersecting;
+\t\t\tif (isVisible) {
+\t\t\t\tvoid startGlobe();
+\t\t\t\treturn;
+\t\t\t}
+
+\t\t\tstopAnimation();
+\t\t}, { threshold: 0.15 });
+
+\t\tobserver.observe(canvas);
+\t});
+
+\tonDestroy(() => {
+\t\tobserver?.disconnect();
+
+\t\tif (onWindowPointerMove) {
+\t\t\twindow.removeEventListener('pointermove', onWindowPointerMove);
+\t\t\tonWindowPointerMove = null;
+\t\t}
+
+\t\tif (onWindowPointerUp) {
+\t\t\twindow.removeEventListener('pointerup', onWindowPointerUp);
+\t\t\twindow.removeEventListener('pointercancel', onWindowPointerUp);
+\t\t\tonWindowPointerUp = null;
+\t\t}
+
+\t\thandlePointerUp();
+\t\tdestroyGlobe();
+\t});
+</script>
+
+<div class="globe">
+\t<canvas
+\t\tbind:this={canvas}
+\t\tclass="globe-canvas"
+\t\tclass:ready={!!globe}
+\t\tclass:dragging={isDragging}
+\t\tonpointerdown={handlePointerDown}
+\t></canvas>
+
+\t{#each satelliteMarkers as marker, index (marker.id)}
+\t\t<div
+\t\t\tclass="satellite"
+\t\t\tstyle={\`position-anchor: --cobe-\${marker.id}; --satellite-visible: var(--cobe-visible-\${marker.id}, 0); --satellite-delay: \${index * 120}ms; --satellite-tilt: \${index % 2 === 0 ? -10 : 10}deg;\`}
+\t\t>
+\t\t\t<span class="satellite-wave"></span>
+\t\t\t<span class="satellite-icon">🛰</span>
+\t\t</div>
+\t{/each}
+</div>
+
+<style>
+\t.globe {
+\t\tposition: relative;
+\t\twidth: min(100%, 26rem);
+\t\taspect-ratio: 1;
+\t\tuser-select: none;
+\t}
+
+\t.globe-canvas {
+\t\twidth: 100%;
+\t\theight: 100%;
+\t\taspect-ratio: 1;
+\t\tborder-radius: 9999px;
+\t\tcursor: grab;
+\t\topacity: 0;
+\t\ttouch-action: none;
+\t\ttransition: opacity 0.8s ease;
+\t}
+
+\t.globe-canvas.ready {
+\t\topacity: 1;
+\t}
+
+\t.globe-canvas.dragging {
+\t\tcursor: grabbing;
+\t}
+
+\t.satellite {
+\t\tposition: absolute;
+\t\tbottom: anchor(top);
+\t\tleft: anchor(center);
+\t\tdisplay: grid;
+\t\twidth: clamp(1.9rem, 1.5rem + 0.8vw, 2.6rem);
+\t\tplace-items: center;
+\t\taspect-ratio: 1;
+\t\ttranslate: -50% 6px;
+\t\topacity: var(--satellite-visible);
+\t\tfilter: blur(calc((1 - var(--satellite-visible)) * 8px));
+\t\ttransform: rotate(var(--satellite-tilt));
+\t\ttransition:
+\t\t\topacity 0.25s ease,
+\t\t\tfilter 0.25s ease;
+\t\tpointer-events: none;
+\t}
+
+\t.satellite-wave,
+\t.satellite-icon {
+\t\tgrid-area: 1 / 1;
+\t}
+
+\t.satellite-wave {
+\t\twidth: 100%;
+\t\theight: 100%;
+\t\tborder: 1.5px solid rgb(125 211 252 / 0.6);
+\t\tborder-radius: 9999px;
+\t\tbox-shadow:
+\t\t\t0 0 0 1px rgb(255 255 255 / 0.55) inset,
+\t\t\t0 0 18px rgb(56 189 248 / 0.25);
+\t\tanimation: satellite-ping 2.8s ease-out infinite;
+\t\tanimation-delay: var(--satellite-delay);
+\t}
+
+\t.satellite-icon {
+\t\tfont-size: clamp(1rem, 0.85rem + 0.55vw, 1.45rem);
+\t\tline-height: 1;
+\t\ttext-shadow:
+\t\t\t0 0 12px rgb(125 211 252 / 0.45),
+\t\t\t0 3px 8px rgb(15 23 42 / 0.2);
+\t}
+
+\t.satellite:nth-child(4n) .satellite-wave {
+\t\tanimation-duration: 3.4s;
+\t}
+
+\t.satellite:nth-child(5n) .satellite-wave {
+\t\tanimation-duration: 2.3s;
+\t}
+
+\t@keyframes satellite-ping {
+\t\t0% {
+\t\t\ttransform: scale(0.72);
+\t\t\topacity: 0.9;
+\t\t}
+
+\t\t70% {
+\t\t\ttransform: scale(1.45);
+\t\t\topacity: 0;
+\t\t}
+
+\t\t100% {
+\t\t\ttransform: scale(1.6);
+\t\t\topacity: 0;
+\t\t}
+\t}
+\t
+\t@media (max-width: 640px) {
+\t\t.satellite {
+\t\t\ttranslate: -50% 2px;
+\t\t}
+\t}
+</style>`;
+
 const cdnCode = `<script lang="ts">
 \timport createGlobe from 'cobe';
 \timport type { Globe } from 'cobe';
@@ -851,5 +1209,6 @@ const cdnCode = `<script lang="ts">
 export const exampleCode = {
 	sticker: stickerCode,
 	polaroid: polaroidCode,
+	satellites: satellitesCode,
 	cdn: cdnCode
 } as const;
