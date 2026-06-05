@@ -57,7 +57,7 @@
 		}
 
 		if (!isDragging) {
-			autoPhi += 0.0028;
+			autoPhi += 0.003;
 		}
 
 		globe.update({
@@ -385,20 +385,18 @@
 		bottom: anchor(top);
 		left: anchor(center);
 		translate: -50% 0;
-		border-radius: 999px;
-		background: rgb(17 17 17 / 0.94);
-		box-shadow: 0 8px 20px rgb(15 23 42 / 0.18);
-		color: #fff;
 		font-family: var(--font-mono), monospace;
 		font-size: 0.5rem;
-		letter-spacing: 0.04em;
+		color: #fff;
+		background: #000;
 		opacity: var(--arc-visible);
 		filter: blur(calc((1 - var(--arc-visible)) * 8px));
 		padding: 3px 8px;
-		transition:
-			opacity 0.3s ease,
-			filter 0.3s ease;
+		border-radius: 4px;
 		white-space: nowrap;
+		transition:
+			opacity 0.3s,
+			filter 0.3s;
 		pointer-events: none;
 	}
 
@@ -444,10 +442,9 @@
 			font-size: 0.45rem;
 			padding: 1px 4px;
 		}
-
 		.showcase-cdn-arc-label {
 			font-size: 0.4rem;
-			padding: 2px 6px;
+			padding: 2px 5px;
 		}
 	}
 </style>
