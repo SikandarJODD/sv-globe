@@ -1,10 +1,10 @@
 import type { Component } from 'svelte';
 
-import Polaroids from '$lib/components/example/polaroids.svelte';
-import { exampleCode } from '$lib/components/example/code';
 import {
+	ArcTour,
 	Base,
 	Basic,
+	Colors,
 	CssAnchor,
 	Draggable,
 	FocusLocation,
@@ -23,7 +23,7 @@ export type UsageItem = {
 export const usageItems: UsageItem[] = [
 	{
 		title: 'Base Setup',
-		desc: 'Minimal globe setup with animated rotation, markers, and a single arc for a fast starting point.',
+		desc: 'Minimal globe setup with animated rotation and markers for a fast starting point.',
 		preview: Base,
 		code: usageCode.base,
 		name: 'base.svelte'
@@ -43,6 +43,13 @@ export const usageItems: UsageItem[] = [
 		name: 'draggable.svelte'
 	},
 	{
+		title: 'Globe Colors',
+		desc: 'Shows how `baseColor`, `markerColor`, `arcColor`, `dark`, and `mapBrightness` change the globe mood without adding extra interaction.',
+		preview: Colors,
+		code: usageCode.colors,
+		name: 'colors.svelte'
+	},
+	{
 		title: 'CSS Anchor Labels',
 		desc: 'Attaches HTML labels to globe markers using CSS anchor positioning for richer marker annotations.',
 		preview: CssAnchor,
@@ -57,17 +64,17 @@ export const usageItems: UsageItem[] = [
 		name: 'focus-location.svelte'
 	},
 	{
+		title: 'Dynamic Arc Tour',
+		desc: 'Switch between five routes, auto-focus the destination city, and keep drag interaction available for a richer flight-style preview.',
+		preview: ArcTour,
+		code: usageCode.arcTour,
+		name: 'arc-tour.svelte'
+	},
+	{
 		title: 'Performance Pattern',
 		desc: 'Shows how to pause rendering off-screen and recreate the globe only when it is visible again.',
 		preview: Performance,
 		code: usageCode.performance,
 		name: 'performance.svelte'
-	},
-	{
-		title: 'Polaroid Overlay Example',
-		desc: 'Combines marker anchors with image cards so you can attach richer visual callouts to locations on the globe.',
-		preview: Polaroids,
-		code: exampleCode.polaroid,
-		name: 'polaroids.svelte'
 	}
 ];

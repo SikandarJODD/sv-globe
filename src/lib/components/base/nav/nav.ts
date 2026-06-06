@@ -11,7 +11,6 @@ export const navItems: NavItem[] = [
 	{ href: '/setup', label: 'Setup' },
 	{ href: '/usage', label: 'Usage' },
 	{ href: '/examples', label: 'Examples' },
-	{ href: '/types', label: 'Types' },
 	{ href: '/performance', label: 'Performance' },
 	{ href: '/llms.txt', label: 'llms.txt' }
 ];

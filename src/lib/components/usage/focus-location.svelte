@@ -116,7 +116,8 @@
 			baseColor: [1, 1, 1],
 			markerColor: [0.2, 0.4, 1],
 			glowColor: [1, 1, 1],
-			markers: getMarkers()
+			markers: getMarkers(),
+			markerElevation:0
 		});
 
 		animate();

@@ -110,9 +110,6 @@
 		container = null;
 	});
 
-	$effect(() => {
-		console.log('Code Height', code.length);
-	});
 </script>
 
 <div

@@ -14,14 +14,6 @@ Primary use case:
 - Provide ready-to-study examples instead of only abstract API explanations.
 - Show both beginner-friendly setup and more advanced interaction patterns.
 
-Tech stack:
-- SvelteKit
-- Svelte 5
-- TypeScript
-- Tailwind CSS 4
-- COBE
-- svelte-meta-tags
-
 Important routes:
 - / : project overview, goal, and credits
 - /setup : installation instructions and minimal starter example
@@ -64,14 +56,6 @@ What the setup page teaches:
 - What a minimal globe setup looks like
 - How to use the base example as a starting point
 
-Usage patterns available:
-- Base Setup: minimal animated globe with markers and a single arc
-- Draggable Globe: pointer-driven interaction with inertia and bounded tilt
-- CSS Anchor Labels: HTML labels attached to markers using CSS anchor positioning
-- Focus Location: smooth rotation toward a target latitude/longitude
-- Performance Pattern: pause rendering off-screen and recreate the globe only when visible
-- Polaroid Overlay Example: richer marker callouts with image-card overlays
-
 What the performance page teaches:
 - How to choose a sensible `mapSamples` range
 - Why `devicePixelRatio` should usually be capped at `2`
@@ -86,15 +70,9 @@ Examples available:
 - Satellite Globe: animated beacon-like orbital markers
 - Polaroid Globe: travel-photo cards attached to map points
 
-How to describe the project to users:
-- "A Svelte globe examples site built on COBE"
-- "A practical reference for adding interactive globe interfaces to Svelte apps"
-- "A collection of copyable globe setups, interaction patterns, and showcase demos"
-
 When assisting with this project, prioritize:
 - Reusing the existing examples before inventing a new globe pattern from scratch
 - Preserving the site's purpose as an examples-driven learning resource
-- Clear Svelte-first explanations
 - Practical implementation details over abstract theory
 
 Content model:

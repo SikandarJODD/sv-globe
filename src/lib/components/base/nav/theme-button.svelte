@@ -3,18 +3,19 @@
 	import SunIcon from '@lucide/svelte/icons/sun';
 	import { mode, toggleMode } from 'mode-watcher';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import { cn } from '$lib/utils';
 
 	interface Props {
-		className?: string;
+		class?: string;
 	}
 
-	let { className = '' }: Props = $props();
+	let { class: className = '' }: Props = $props();
 </script>
 
 <Button
 	variant="ghost"
 	size="icon-sm"
-	class={className}
+	class={cn('text-muted-foreground', className)}
 	aria-label={`Switch to ${mode.current === 'dark' ? 'light' : 'dark'} mode`}
 	onclick={toggleMode}
 >

@@ -44,7 +44,7 @@
 				Github
 			</a>
 
-			<ThemeButton className="rounded-sm text-muted-foreground" />
+			<ThemeButton class="rounded-sm" />
 		</div>
 
 		<SponsorButton

@@ -43,7 +43,8 @@
 			markers: [
 				{ location: [37.78, -122.44], size: 0.03, id: 'sf' },
 				{ location: [40.71, -74.01], size: 0.03, id: 'nyc' }
-			]
+			],
+			markerElevation:0
 		});
 	}
 

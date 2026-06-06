@@ -89,7 +89,7 @@
 						Github
 					</a>
 
-					<ThemeButton className="text-muted-foreground" />
+					<ThemeButton />
 				</div>
 
 				<div class="w-full flex text-center">

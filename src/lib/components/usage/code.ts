@@ -33,11 +33,7 @@ const baseCode = `<script lang="ts">
 \t\t\tmarkers: [
 \t\t\t\t{ location: [37.78, -122.44], size: 0.03, id: 'sf' },
 \t\t\t\t{ location: [40.71, -74.01], size: 0.03, id: 'nyc' }
-\t\t\t],
-\t\t\tarcs: [{ from: [37.78, -122.44], to: [40.71, -74.01] }],
-\t\t\tarcColor: [0.3, 0.5, 1],
-\t\t\tarcWidth: 0.5,
-\t\t\tarcHeight: 0.3
+\t\t\t]
 \t\t});
 
 \t\tanimate();
@@ -238,6 +234,57 @@ const draggableCode = `<script lang="ts">
 </div>
 `;
 
+const colorsCode = `<script lang="ts">
+\timport createGlobe from 'cobe';
+\timport type { Globe } from 'cobe';
+\timport { onMount } from 'svelte';
+
+\tconst palette = {
+\t\tbaseColor: [0.98, 0.95, 0.9] as [number, number, number],
+\t\tmarkerColor: [0.86, 0.43, 0.14] as [number, number, number],
+\t\tarcColor: [0.97, 0.57, 0.2] as [number, number, number],
+\t\tdark: 0.08,
+\t\tmapBrightness: 7.4
+\t};
+
+\tlet canvas: HTMLCanvasElement | null = null;
+\tlet globe: Globe | null = null;
+
+\tonMount(() => {
+\t\tif (!canvas) return;
+
+\t\tglobe = createGlobe(canvas, {
+\t\t\tdevicePixelRatio: Math.min(window.devicePixelRatio, 2),
+\t\t\twidth: 300,
+\t\t\theight: 300,
+\t\t\tphi: 0.2,
+\t\t\ttheta: 0.2,
+\t\t\tdark: palette.dark,
+\t\t\tdiffuse: 1.1,
+\t\t\tmapSamples: 14000,
+\t\t\tmapBrightness: palette.mapBrightness,
+\t\t\tbaseColor: palette.baseColor,
+\t\t\tmarkerColor: palette.markerColor,
+\t\t\tglowColor: [0.99, 0.94, 0.87],
+\t\t\tmarkers: [
+\t\t\t\t{ id: 'tokyo', location: [35.68, 139.65], size: 0.04 },
+\t\t\t\t{ id: 'sf', location: [37.78, -122.44], size: 0.04 }
+\t\t\t],
+\t\t\tarcs: [{ from: [35.68, 139.65], to: [37.78, -122.44] }],
+\t\t\tarcColor: palette.arcColor,
+\t\t\tarcWidth: 0.55,
+\t\t\tarcHeight: 0.2
+\t\t});
+
+\t\treturn () => globe?.destroy();
+\t});
+</script>
+
+<div class="globe">
+\t<canvas bind:this={canvas} class="globe-canvas"></canvas>
+</div>
+`;
+
 const focusLocationCode = `<script lang="ts">
 \timport createGlobe from 'cobe';
 \timport type { Globe } from 'cobe';
@@ -312,6 +359,134 @@ const focusLocationCode = `<script lang="ts">
 </script>
 `;
 
+const arcTourCode = `<script lang="ts">
+\timport createGlobe from 'cobe';
+\timport type { Globe } from 'cobe';
+\timport { onMount } from 'svelte';
+
+\tconst routes = [
+\t\t{
+\t\t\tid: 'tokyo-usa',
+\t\t\tlabel: 'Tokyo -> USA',
+\t\t\tfrom: [35.68, 139.65] as [number, number],
+\t\t\tto: [37.78, -122.44] as [number, number]
+\t\t},
+\t\t{
+\t\t\tid: 'london-dubai',
+\t\t\tlabel: 'London -> Dubai',
+\t\t\tfrom: [51.5, -0.12] as [number, number],
+\t\t\tto: [25.2, 55.27] as [number, number]
+\t\t},
+\t\t{
+\t\t\tid: 'delhi-singapore',
+\t\t\tlabel: 'Delhi -> Singapore',
+\t\t\tfrom: [28.61, 77.21] as [number, number],
+\t\t\tto: [1.35, 103.82] as [number, number]
+\t\t},
+\t\t{
+\t\t\tid: 'sydney-tokyo',
+\t\t\tlabel: 'Sydney -> Tokyo',
+\t\t\tfrom: [-33.87, 151.21] as [number, number],
+\t\t\tto: [35.68, 139.65] as [number, number]
+\t\t},
+\t\t{
+\t\t\tid: 'paris-nyc',
+\t\t\tlabel: 'Paris -> NYC',
+\t\t\tfrom: [48.86, 2.35] as [number, number],
+\t\t\tto: [40.71, -74.01] as [number, number]
+\t\t}
+\t];
+
+\tlet canvas: HTMLCanvasElement | null = null;
+\tlet globe: Globe | null = null;
+\tlet activeRouteId = $state(routes[0].id);
+\tlet frame = 0;
+\tlet phi = 0;
+\tlet theta = 0.2;
+
+\tfunction locationToAngles(lat: number, long: number) {
+\t\treturn [Math.PI - ((long * Math.PI) / 180 - Math.PI / 2), (lat * Math.PI) / 180];
+\t}
+
+\tfunction normalizeDelta(delta: number) {
+\t\treturn Math.atan2(Math.sin(delta), Math.cos(delta));
+\t}
+
+\tfunction getActiveRoute() {
+\t\treturn routes.find((route) => route.id === activeRouteId) ?? routes[0];
+\t}
+
+\tfunction animate() {
+\t\tconst route = getActiveRoute();
+\t\tconst [targetPhi, targetTheta] = locationToAngles(...route.to);
+
+\t\tphi += normalizeDelta(targetPhi - phi) * 0.08;
+\t\ttheta += (targetTheta - theta) * 0.08;
+
+\t\tglobe?.update({
+\t\t\tphi,
+\t\t\ttheta,
+\t\t\tmarkers: [
+\t\t\t\t{ id: 'from', location: route.from, size: 0.038 },
+\t\t\t\t{ id: 'to', location: route.to, size: 0.052 }
+\t\t\t],
+\t\t\tarcs: [{ id: route.id, from: route.from, to: route.to }]
+\t\t});
+
+\t\tframe = requestAnimationFrame(animate);
+\t}
+
+\tonMount(() => {
+\t\tif (!canvas) return;
+
+\t\tconst route = getActiveRoute();
+\t\t[phi, theta] = locationToAngles(...route.to);
+
+\t\tglobe = createGlobe(canvas, {
+\t\t\tdevicePixelRatio: Math.min(window.devicePixelRatio, 2),
+\t\t\twidth: 300,
+\t\t\theight: 300,
+\t\t\tphi,
+\t\t\ttheta,
+\t\t\tdark: 0.04,
+\t\t\tdiffuse: 1.1,
+\t\t\tmapSamples: 13000,
+\t\t\tmapBrightness: 7,
+\t\t\tbaseColor: [0.98, 0.98, 1],
+\t\t\tmarkerColor: [0.95, 0.53, 0.16],
+\t\t\tglowColor: [0.94, 0.96, 1],
+\t\t\tmarkers: [
+\t\t\t\t{ id: 'from', location: route.from, size: 0.038 },
+\t\t\t\t{ id: 'to', location: route.to, size: 0.052 }
+\t\t\t],
+\t\t\tarcs: [{ id: route.id, from: route.from, to: route.to }],
+\t\t\tarcColor: [0.99, 0.55, 0.18],
+\t\t\tarcWidth: 0.52,
+\t\t\tarcHeight: 0.18
+\t\t});
+
+\t\tanimate();
+
+\t\treturn () => {
+\t\t\tcancelAnimationFrame(frame);
+\t\t\tglobe?.destroy();
+\t\t};
+\t});
+</script>
+
+<div class="tour">
+\t<canvas bind:this={canvas}></canvas>
+
+\t<div class="route-list">
+\t\t{#each routes as route (route.id)}
+\t\t\t<button type="button" onclick={() => (activeRouteId = route.id)}>
+\t\t\t\t{route.label}
+\t\t\t</button>
+\t\t{/each}
+\t</div>
+</div>
+`;
+
 const performanceCode = `<script lang="ts">
 \timport createGlobe from 'cobe';
 \timport type { Globe } from 'cobe';
@@ -376,8 +551,10 @@ const performanceCode = `<script lang="ts">
 export const usageCode = {
 	base: baseCode,
 	basic: basicCode,
+	colors: colorsCode,
 	cssAnchor: cssAnchorCode,
 	draggable: draggableCode,
+	arcTour: arcTourCode,
 	focusLocation: focusLocationCode,
 	performance: performanceCode
 } as const;
