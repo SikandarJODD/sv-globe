@@ -1,7 +1,9 @@
 <script lang="ts">
 	import type { File, FileContents, ThemesType } from '@pierre/diffs';
+	import CopyButton from '../copy-button/copy-button.svelte';
 	import { mode } from 'mode-watcher';
 	import { onDestroy, onMount } from 'svelte';
+	import { cn } from '$lib/utils';
 
 	const defaultTheme: ThemesType = {
 		dark: 'pierre-dark',
@@ -84,6 +86,8 @@
 		instance?.setThemeType(mode.current as 'dark' | 'light');
 	});
 
+	let hasMoreContent = $derived(code.length > 300);
+
 	onMount(() => {
 		if (!container) return;
 
@@ -105,12 +109,30 @@
 		destroyCode();
 		container = null;
 	});
+
+	$effect(() => {
+		console.log('Code Height', code.length);
+	});
 </script>
 
 <div
-	class="container h-120 overflow-hidden rounded-xl border border-ink/12 bg-card dark:border-border"
+	class="relative container min-h-40 overflow-hidden rounded-xl border border-ink/12 bg-card dark:border-border"
 >
-	<div class="h-full overflow-y-auto rounded-lg">
+	<div
+		class={cn(
+			'absolute top-2 right-2 z-10 flex h-0 justify-end',
+			hasMoreContent && 'pointer-events-none top-2.5 right-4'
+		)}
+	>
+		<CopyButton
+			text={code}
+			size="icon-sm"
+			tabindex={0}
+			title={`Copy ${name}`}
+			class="pointer-events-auto rounded-sm border border-dashed border-ink/50 bg-ink/5 text-ink shadow-none backdrop-blur-sm transition-colors hover:border-ink/50 hover:bg-ink/10 hover:text-ink dark:border-primary/50  dark:bg-card/90 dark:text-primary dark:hover:bg-primary/10 [&_svg]:size-3.5"
+		/>
+	</div>
+	<div class="relative h-full max-h-120 overflow-y-auto rounded-lg">
 		<div bind:this={container}></div>
 	</div>
 </div>
