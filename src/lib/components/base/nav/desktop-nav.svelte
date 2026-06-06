@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Separator from '$lib/components/ui/separator/separator.svelte';
-	import SponsorButton from './sponsor-button.svelte';
+	import SponsorDropdown from './sponsor-dropdown.svelte';
 	import ThemeButton from './theme-button.svelte';
 	import type { NavItem } from './nav';
 
@@ -9,9 +9,10 @@
 		items: NavItem[];
 		githubLink: string;
 		sponsorLink: string;
+		polarCheckoutLink: string;
 	}
 
-	let { title, items, githubLink, sponsorLink }: Props = $props();
+	let { title, items, githubLink, sponsorLink, polarCheckoutLink }: Props = $props();
 </script>
 
 <nav
@@ -41,15 +42,12 @@
 				rel="noreferrer"
 				class="text-sm text-ink px-2 py-1 border border-ink/40 dark:border-primary/30 dark:text-primary border-dashed"
 			>
-				Github
+				GitHub
 			</a>
 
 			<ThemeButton class="rounded-sm" />
 		</div>
 
-		<SponsorButton
-			href={sponsorLink}
-			class="border border-dashed border-ink/40 bg-ink-dim/30 px-4 py-2.5 text-xs text-ink transition-all -mt-2.5 duration-200 dark:border-primary/30 dark:bg-card dark:text-primary dark:hover:bg-card/80"
-		/>
+		<SponsorDropdown githubSponsorLink={sponsorLink} {polarCheckoutLink} class="-mt-2.5" />
 	</div>
 </nav>

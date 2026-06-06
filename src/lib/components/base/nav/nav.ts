@@ -25,7 +25,7 @@ export const docsRouteStack: DocsRouteEntry[] = [
 		href: '/setup',
 		navLabel: 'Setup',
 		label: 'Installation & Setup',
-		description: 'Set up SvelteKit, initialize shadcn-svelte, and add your first globe.'
+		description: 'Install COBE, preview the base setup, and add your first globe.'
 	},
 	{
 		href: '/usage',
@@ -62,3 +62,5 @@ export const docsBottomNavItems: DocsNavItem[] = docsRouteStack
 
 export const githubLink = 'https://github.com/SikandarJODD/sv-globe';
 export const sponsorLink = 'https://github.com/sponsors/SikandarJODD';
+export const polarCheckoutLink =
+	'https://buy.polar.sh/polar_cl_cdmHDkzMGIgXAhscYAtbgXhkILYXoBlv9Qgoq22TrwY';

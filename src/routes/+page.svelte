@@ -16,7 +16,7 @@
 				</h2>
 				<p class="max-w-2xl font-figtree text-base leading-7 text-muted-foreground">
 					My goal is to make it simpler for Svelte developers to add interactive globes into their
-					projects... just grab an example and lesss go 😁😁🚀
+					projects... just grab an example and go.
 				</p>
 			</div>
 		</section>

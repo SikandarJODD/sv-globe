@@ -72,7 +72,7 @@ export const usageItems: UsageItem[] = [
 	},
 	{
 		title: 'Performance Pattern',
-		desc: 'Shows how to pause rendering off-screen and recreate the globe only when it is visible again.',
+		desc: 'Shows how to pause rendering off-screen and resume animation only when the globe is visible again.',
 		preview: Performance,
 		code: usageCode.performance,
 		name: 'performance.svelte'

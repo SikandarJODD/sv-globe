@@ -86,7 +86,7 @@
 						rel="noreferrer"
 						class="text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
 					>
-						Github
+						GitHub
 					</a>
 
 					<ThemeButton />

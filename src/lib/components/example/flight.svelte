@@ -307,12 +307,12 @@
 	}
 
 	@media (max-width: 640px) {
-		.showcase-flight {
+		.flight {
 			font-size: 1rem;
 		}
 		.globe {
-			width: 520px;
-			height: 520px;
+			width: min(100%, 320px);
+			height: min(100vw, 320px);
 		}
 	}
 </style>

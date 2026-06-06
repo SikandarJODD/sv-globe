@@ -208,6 +208,15 @@
 		@apply font-sans;
 		-webkit-font-smoothing: antialiased;
 	}
+	::selection {
+		background-color: var(--ink-dim);
+		color: var(--ink);
+	}
+
+	.dark ::selection {
+		background-color: var(--primary);
+		color: var(--primary-foreground);
+	}
 
 	/* --- Track & Thumb dimensions --- */
 	*::-webkit-scrollbar {
@@ -287,8 +296,8 @@
 }
 
 .route-fallback--page-forward {
-	animation: route-fallback-forward-in var(--nav-fallback-forward-duration)
-		var(--nav-forward-ease) both;
+	animation: route-fallback-forward-in var(--nav-fallback-forward-duration) var(--nav-forward-ease)
+		both;
 }
 
 .route-fallback--page-back {

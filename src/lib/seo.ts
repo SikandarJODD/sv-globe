@@ -18,7 +18,7 @@ export const siteConfig = {
 		'Setup guides and example patterns for building interactive 3D globe interfaces in Svelte with COBE.'
 } as const;
 
-export const indexablePaths = ['/', '/setup', '/usage', '/examples'] as const;
+export const indexablePaths = ['/', '/setup', '/usage', '/examples', '/performance'] as const;
 
 export type PageSeoInput = {
 	pathname: string;

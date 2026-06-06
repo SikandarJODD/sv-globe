@@ -4,4 +4,4 @@
 	let { ...restProps }: DropdownMenuPrimitive.PortalProps = $props();
 </script>
 
-<DropdownMenuPrimitive.Portal {...restProps} />
+<DropdownMenuPrimitive.Portal  {...restProps} />
