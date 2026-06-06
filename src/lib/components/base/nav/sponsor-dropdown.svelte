@@ -32,7 +32,7 @@
 	let open = $state(false);
 
 	const upiLink =
-		'upi://pay?pa=imdead6174@oksbi&pn=Bhide%20Svelte&tn=Sponsor%20Bhide%20Svelte&am=400&cu=INR';
+		'upi://pay?pa=imdead6174@oksbi&pn=Bhide%20Svelte&tn=Sponsor%20Bhide%20Svelte&cu=INR';
 
 	let sponsorOptions: SponsorLinkOption[] = $derived([
 		{ key: 'polar', label: 'Polar', href: polarCheckoutLink, logo: polarLogo },
