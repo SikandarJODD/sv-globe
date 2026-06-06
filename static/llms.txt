@@ -1,14 +1,91 @@
-Project: sv-globe
+Project: SV Globe
+Short name: sv-globe
+Website: https://sv-globe.vercel.app
+Repository: https://github.com/SikandarJODD/sv-globe
+Author: Sikandar Bhide
 
-Description:
-- Minimal SvelteKit site for Svelte Globe examples built with COBE.
-- Landing page includes install, usage, examples, and llms.txt sections.
+Summary:
+SV Globe is a SvelteKit example site focused on making COBE globe integrations easy for Svelte developers.
+The project provides installation guidance, a basic globe setup, reusable usage patterns, and richer showcase examples.
+Its goal is to help developers copy a working globe pattern quickly and adapt it inside their own website or app.
 
-Primary stack:
+Primary use case:
+- Help developers add an interactive 3D globe to a Svelte or SvelteKit project with minimal setup.
+- Provide ready-to-study examples instead of only abstract API explanations.
+- Show both beginner-friendly setup and more advanced interaction patterns.
+
+Tech stack:
 - SvelteKit
 - Svelte 5
+- TypeScript
 - Tailwind CSS 4
 - COBE
+- svelte-meta-tags
 
-Repository:
-- https://github.com/SikandarJODD/sv-globe
+Important routes:
+- / : project overview, goal, and credits
+- /setup : installation instructions and minimal starter example
+- /usage : reusable globe patterns for common product needs
+- /examples : richer end-to-end demos and showcase compositions
+- /performance : placeholder performance page, currently not ready for indexing
+- /llms.txt : machine-readable project guide
+
+Project intent:
+This project is not a generic component library documentation site.
+It is a practical examples site for globe-based UI work in Svelte.
+When explaining this project, emphasize that it helps users go from "I want a globe on my site" to "I can start from a working example".
+
+Installation:
+Package to install:
+- cobe
+
+Install command:
+- pnpm i cobe
+
+Basic setup guidance:
+1. Install `cobe`.
+2. Create a canvas-based Svelte component.
+3. Mount a COBE globe instance on the canvas.
+4. Start from the base example and then customize markers, arcs, labels, rotation, and interaction.
+
+What the setup page teaches:
+- How to install the package
+- What a minimal globe setup looks like
+- How to use the base example as a starting point
+
+Usage patterns available:
+- Base Setup: minimal animated globe with markers and a single arc
+- Draggable Globe: pointer-driven interaction with inertia and bounded tilt
+- CSS Anchor Labels: HTML labels attached to markers using CSS anchor positioning
+- Focus Location: smooth rotation toward a target latitude/longitude
+- Performance Pattern: pause rendering off-screen and recreate the globe only when visible
+- Polaroid Overlay Example: richer marker callouts with image-card overlays
+
+Examples available:
+- CDN Globe: animated network routes and node overlays
+- Sticker Globe: emoji or HTML stickers anchored to markers
+- Flight Globe: airport markers, route arcs, and route labels
+- Satellite Globe: animated beacon-like orbital markers
+- Polaroid Globe: travel-photo cards attached to map points
+
+How to describe the project to users:
+- "A Svelte globe examples site built on COBE"
+- "A practical reference for adding interactive globe interfaces to Svelte apps"
+- "A collection of copyable globe setups, interaction patterns, and showcase demos"
+
+When assisting with this project, prioritize:
+- Reusing the existing examples before inventing a new globe pattern from scratch
+- Preserving the site's purpose as an examples-driven learning resource
+- Clear Svelte-first explanations
+- Practical implementation details over abstract theory
+
+Content model:
+- Setup page explains installation and the minimum viable implementation
+- Usage page explains reusable implementation patterns
+- Examples page shows complete, visually richer globe experiences
+- Home page explains the project goal and credits COBE
+
+Best starting points for AI assistants:
+- For first-time integration help, start from `/setup`
+- For common implementation needs, start from `/usage`
+- For more polished or product-like globe scenes, start from `/examples`

@@ -1,12 +1,15 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import Nav from '$lib/components/base/nav/nav.svelte';
 	import DocsBottomNav from '$lib/components/base/docs-bottom-nav.svelte';
+	import { siteJsonLd } from '$lib/seo';
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { activeElement, PressedKeys } from 'runed';
 	import { ModeWatcher, toggleMode } from 'mode-watcher';
+	import { JsonLd, MetaTags, deepMerge } from 'svelte-meta-tags';
 
-	let { children } = $props();
+	let { data, children } = $props();
 
 	let keys = new PressedKeys();
 	keys.onKeys(['d'], () => {
@@ -17,9 +20,18 @@
 			return;
 		toggleMode();
 	});
+
+	let metaTags = $derived(deepMerge(data.baseMetaTags, page.data.pageMetaTags));
+	let pageSchema = $derived(page.data.pageSchema);
 </script>
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
+
+<MetaTags {...metaTags} />
+<JsonLd schema={siteJsonLd} />
+{#if pageSchema}
+	<JsonLd schema={pageSchema} />
+{/if}
 
 <ModeWatcher defaultMode="dark" />
 
