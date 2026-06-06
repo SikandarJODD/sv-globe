@@ -42,7 +42,7 @@
 				rel="noreferrer"
 				class="text-ink underline underline-offset-3 dark:text-primary"
 			>
-				Shu
+				Shu Ding
 			</a>
 			and powered by the original Cobe work.
 		</p>

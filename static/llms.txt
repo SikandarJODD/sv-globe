@@ -1,94 +1,52 @@
 Project: Svelte Globe
-Short name: sv-globe
 Website: https://sv-globe.vercel.app
 Repository: https://github.com/SikandarJODD/sv-globe
-Author: Sikandar Bhide
 
 Summary:
-Svelte Globe is a SvelteKit example site focused on making COBE globe integrations easy for Svelte developers.
-The project provides installation guidance, a basic globe setup, reusable usage patterns, and richer showcase examples.
-Its goal is to help developers copy a working globe pattern quickly and adapt it inside their own website or app.
+Svelte Globe is a SvelteKit examples site for building COBE globes in Svelte.
+It focuses on copyable setup, practical usage patterns, polished demos, and lightweight performance guidance.
 
-Primary use case:
-- Help developers add an interactive 3D globe to a Svelte or SvelteKit project with minimal setup.
-- Provide ready-to-study examples instead of only abstract API explanations.
-- Show both beginner-friendly setup and more advanced interaction patterns.
-
-Important routes:
-- / : project overview, goal, and credits
-- /setup : installation instructions and minimal starter example
-- /usage : reusable globe patterns for common product needs
-- /examples : richer end-to-end demos and showcase compositions
-- /performance : practical COBE performance guidance for tuning render cost and animation lifecycle
-- /llms.txt : machine-readable project guide
+Key routes:
+- `/` overview
+- `/setup` minimal install and starter globe
+- `/usage` reusable globe patterns
+- `/performance` render-cost and lifecycle guidance
+- `/examples` richer showcase demos
+- `/llms.txt` machine-readable project guide
 
 Machine-readable docs:
-- /setup.md : AI-friendly installation and minimal setup guide
-- /usage.md : AI-friendly usage pattern guide
-- /examples.md : AI-friendly examples index
-- /performance.md : AI-friendly deep reference for COBE performance tuning
-- /examples/cdn.md : simple CDN globe example
-- /examples/sticker.md : simple sticker globe example
-- /examples/flight.md : simple flight globe example
-- /examples/satellites.md : simple satellite globe example
-- /examples/polaroids.md : simple polaroid globe example
+- `/setup.md`
+- `/usage.md`
+- `/performance.md`
+- `/examples.md`
+- `/examples/cdn.md`
+- `/examples/sticker.md`
+- `/examples/flight.md`
+- `/examples/satellites.md`
+- `/examples/polaroids.md`
 
-Project intent:
-This project is not a generic component library documentation site.
-It is a practical examples site for globe-based UI work in Svelte.
-When explaining this project, emphasize that it helps users go from "I want a globe on my site" to "I can start from a working example".
+Current usage patterns:
+- Base setup
+- Draggable globe
+- Globe colors
+- CSS anchor labels
+- Focus location
+- Dynamic arc tour
+- Performance pattern
 
-Installation:
-Package to install:
-- cobe
+Performance defaults:
+- cap `devicePixelRatio` at `2`
+- start with `mapSamples` around `12000-16000`
+- use lower values for mobile or dense pages
+- pause animation when off-screen or tab-hidden
+- destroy the globe on teardown
 
-Install command:
-- pnpm i cobe
+AI guidance:
+- Start with `/setup.md` for first integration.
+- Use `/usage.md` for one pattern at a time.
+- Use `/performance.md` when tuning runtime cost.
+- Use `/examples.md` for richer product-like scenes.
+- Prefer the Markdown docs before reading live page code.
 
-Basic setup guidance:
-1. Install `cobe`.
-2. Create a canvas-based Svelte component.
-3. Mount a COBE globe instance on the canvas.
-4. Start from the base example and then customize markers, arcs, labels, rotation, and interaction.
-
-What the setup page teaches:
-- How to install the package
-- What a minimal globe setup looks like
-- How to use the base example as a starting point
-
-What the performance page teaches:
-- How to choose a sensible `mapSamples` range
-- Why `devicePixelRatio` should usually be capped at `2`
-- How to pause animation when the globe is off-screen or the tab is hidden
-- When to use dynamic imports for `cobe`
-- Why canvas size, `globe.update()`, and `globe.destroy()` affect runtime cost
-
-Examples available:
-- CDN Globe: animated network routes and node overlays
-- Sticker Globe: emoji or HTML stickers anchored to markers
-- Flight Globe: airport markers, route arcs, and route labels
-- Satellite Globe: animated beacon-like orbital markers
-- Polaroid Globe: travel-photo cards attached to map points
-
-When assisting with this project, prioritize:
-- Reusing the existing examples before inventing a new globe pattern from scratch
-- Preserving the site's purpose as an examples-driven learning resource
-- Practical implementation details over abstract theory
-
-Content model:
-- Setup page explains installation and the minimum viable implementation
-- Usage page explains reusable implementation patterns
-- Examples page shows complete, visually richer globe experiences
-- Home page explains the project goal and credits COBE
-
-Best starting points for AI assistants:
-- For first-time integration help, start from `/setup`
-- For common implementation needs, start from `/usage`
-- For optimization and runtime cost questions, start from `/performance`
-- For more polished or product-like globe scenes, start from `/examples`
-- For machine-readable code and implementation notes, prefer `/setup.md`, `/usage.md`, `/performance.md`, and `/examples.md`
-
-AI documentation guidance:
-- The live website may use extra runtime optimizations that are not ideal as first teaching material.
-- The Markdown docs intentionally favor simpler code that is easier to copy and explain.
-- When possible, use the Markdown docs first, then fall back to the live page or source files for deeper detail.
+---
+Built by Bhide Svelte : https://bhide.dev

@@ -47,7 +47,7 @@
 							rel="noreferrer"
 							class="text-ink dark:text-primary underline underline-offset-3"
 						>
-							Shu
+							Shu Ding
 						</a>.
 					</p>
 					<p class="max-w-2xl font-figtree text-base leading-7 text-muted-foreground">
