@@ -16,7 +16,7 @@
 
 <nav
 	aria-label="Page navigation"
-	class="hidden w-full max-w-56 text-center lg:sticky lg:top-12 lg:block lg:text-left"
+	class="hidden w-full max-w-56 text-center lg:sticky lg:top-12.5 lg:block lg:text-left"
 >
 	<div class="flex flex-col gap-5">
 		<a href="/" class="font-gp-circle text-2xl text-ink dark:text-primary">{title}</a>

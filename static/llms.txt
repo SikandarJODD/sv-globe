@@ -27,13 +27,14 @@ Important routes:
 - /setup : installation instructions and minimal starter example
 - /usage : reusable globe patterns for common product needs
 - /examples : richer end-to-end demos and showcase compositions
-- /performance : placeholder performance page, currently not ready for indexing
+- /performance : practical COBE performance guidance for tuning render cost and animation lifecycle
 - /llms.txt : machine-readable project guide
 
 Machine-readable docs:
 - /setup.md : AI-friendly installation and minimal setup guide
 - /usage.md : AI-friendly usage pattern guide
 - /examples.md : AI-friendly examples index
+- /performance.md : AI-friendly deep reference for COBE performance tuning
 - /examples/cdn.md : simple CDN globe example
 - /examples/sticker.md : simple sticker globe example
 - /examples/flight.md : simple flight globe example
@@ -71,6 +72,13 @@ Usage patterns available:
 - Performance Pattern: pause rendering off-screen and recreate the globe only when visible
 - Polaroid Overlay Example: richer marker callouts with image-card overlays
 
+What the performance page teaches:
+- How to choose a sensible `mapSamples` range
+- Why `devicePixelRatio` should usually be capped at `2`
+- How to pause animation when the globe is off-screen or the tab is hidden
+- When to use dynamic imports for `cobe`
+- Why canvas size, `globe.update()`, and `globe.destroy()` affect runtime cost
+
 Examples available:
 - CDN Globe: animated network routes and node overlays
 - Sticker Globe: emoji or HTML stickers anchored to markers
@@ -98,8 +106,9 @@ Content model:
 Best starting points for AI assistants:
 - For first-time integration help, start from `/setup`
 - For common implementation needs, start from `/usage`
+- For optimization and runtime cost questions, start from `/performance`
 - For more polished or product-like globe scenes, start from `/examples`
-- For machine-readable code and implementation notes, prefer `/setup.md`, `/usage.md`, and `/examples.md`
+- For machine-readable code and implementation notes, prefer `/setup.md`, `/usage.md`, `/performance.md`, and `/examples.md`
 
 AI documentation guidance:
 - The live website may use extra runtime optimizations that are not ideal as first teaching material.

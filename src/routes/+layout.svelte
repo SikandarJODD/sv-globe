@@ -35,7 +35,7 @@
 
 <ModeWatcher defaultMode="dark" />
 
-<main class="px-6 pb-28 sm:px-8 lg:px-10 lg:pb-10">
+<main class="px-6 md:pt-12 pb-28 sm:px-8 lg:px-10 lg:pb-10">
 	<div class="mx-auto flex max-w-6xl justify-center">
 		<div class="grid w-full max-w-5xl gap-12 lg:grid-cols-[14rem_minmax(0,1fr)] lg:items-start">
 			<Nav />
