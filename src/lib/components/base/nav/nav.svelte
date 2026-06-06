@@ -3,7 +3,7 @@
 	import MobileNav from './mobile-nav.svelte';
 	import { githubLink, navItems, sponsorLink } from './nav';
 
-	const title = 'sv-globe';
+	const title = 'sv-globe'; // 😁
 </script>
 
 <DesktopNav items={navItems} {githubLink} {sponsorLink} {title} />

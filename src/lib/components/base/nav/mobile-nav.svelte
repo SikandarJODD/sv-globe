@@ -33,7 +33,7 @@
 		class="fixed inset-x-0 bottom-0 z-40 border-t border-ink/15 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80"
 	>
 		<div class="mx-auto flex max-w-5xl items-center justify-between px-6 py-4 sm:px-8">
-			<p class="font-gp-circle text-lg text-ink">{title}</p>
+			<p class="font-gp-circle text-lg text-ink">Svelte Globe</p>
 
 			<Button
 				variant="ghost"
@@ -53,7 +53,7 @@
 		>
 			<div class="w-full space-y-5">
 				<div class="flex items-center justify-between gap-4">
-					<p class="font-gp-circle text-xl text-ink dark:text-primary">{title}</p>
+					<p class="font-gp-circle text-xl text-ink dark:text-primary">Svelte Globe</p>
 
 					<Button
 						variant="ghost"
@@ -65,11 +65,11 @@
 					</Button>
 				</div>
 
-				<div class="space-y-3">
+				<div class="space-y-0">
 					{#each items as item (item.href)}
 						<a
 							href={item.href}
-							class="block text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
+							class="block text-sm py-2 text-muted-foreground transition-colors duration-200 hover:text-foreground"
 							onclick={closeMobileMenu}
 						>
 							{item.label}

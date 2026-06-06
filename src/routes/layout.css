@@ -91,6 +91,12 @@
 	/* Colors from COBE Website */
 	--ink: lab(36 55.64 -107.68);
 	--ink-dim: lab(93 0 -8);
+	--nav-forward-duration: 420ms;
+	--nav-back-duration: 280ms;
+	--nav-fallback-forward-duration: 240ms;
+	--nav-fallback-back-duration: 200ms;
+	--nav-forward-ease: cubic-bezier(0.22, 1, 0.36, 1);
+	--nav-back-ease: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .dark {
@@ -252,5 +258,121 @@
 	*::-webkit-scrollbar-corner,
 	*::-webkit-resizer {
 		display: none;
+	}
+}
+
+:root[data-nav-transition]::view-transition-old(root),
+:root[data-nav-transition]::view-transition-new(root) {
+	mix-blend-mode: normal;
+}
+
+:root[data-nav-transition='page-forward']::view-transition-old(root) {
+	animation: nav-forward-old-out var(--nav-forward-duration) var(--nav-forward-ease) both;
+}
+
+:root[data-nav-transition='page-forward']::view-transition-new(root) {
+	animation: nav-forward-new-in var(--nav-forward-duration) var(--nav-forward-ease) both;
+}
+
+:root[data-nav-transition='page-back']::view-transition-old(root) {
+	animation: nav-back-old-out var(--nav-back-duration) var(--nav-back-ease) both;
+}
+
+:root[data-nav-transition='page-back']::view-transition-new(root) {
+	animation: nav-back-new-in var(--nav-back-duration) var(--nav-back-ease) both;
+}
+
+.route-fallback {
+	will-change: transform, opacity;
+}
+
+.route-fallback--page-forward {
+	animation: route-fallback-forward-in var(--nav-fallback-forward-duration)
+		var(--nav-forward-ease) both;
+}
+
+.route-fallback--page-back {
+	animation: route-fallback-back-in var(--nav-fallback-back-duration) var(--nav-back-ease) both;
+}
+
+@keyframes nav-forward-old-out {
+	from {
+		opacity: 1;
+		transform: translateX(0) scale(1);
+	}
+
+	to {
+		opacity: 0.82;
+		transform: translateX(-4.5%) scale(0.985);
+	}
+}
+
+@keyframes nav-forward-new-in {
+	from {
+		opacity: 0.92;
+		transform: translateX(100%);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes nav-back-old-out {
+	from {
+		opacity: 1;
+		transform: translateX(0);
+	}
+
+	to {
+		opacity: 0.94;
+		transform: translateX(100%);
+	}
+}
+
+@keyframes nav-back-new-in {
+	from {
+		opacity: 0.92;
+		transform: translateX(-3.5%) scale(0.99);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateX(0) scale(1);
+	}
+}
+
+@keyframes route-fallback-forward-in {
+	from {
+		opacity: 0.94;
+		transform: translate3d(20px, 0, 0);
+	}
+
+	to {
+		opacity: 1;
+		transform: translate3d(0, 0, 0);
+	}
+}
+
+@keyframes route-fallback-back-in {
+	from {
+		opacity: 0.94;
+		transform: translate3d(-12px, 0, 0);
+	}
+
+	to {
+		opacity: 1;
+		transform: translate3d(0, 0, 0);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	:root[data-nav-transition]::view-transition-old(root),
+	:root[data-nav-transition]::view-transition-new(root),
+	.route-fallback,
+	.route-fallback--page-forward,
+	.route-fallback--page-back {
+		animation: none !important;
 	}
 }
