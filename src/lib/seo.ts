@@ -7,7 +7,7 @@ import {
 
 export const siteConfig = {
 	siteUrl: 'https://sv-globe.vercel.app',
-	siteName: 'SV Globe',
+	siteName: 'Svelte Globe',
 	brandTitle: 'Svelte Globe Examples',
 	repoUrl: 'https://github.com/SikandarJODD/sv-globe',
 	githubProfileUrl: 'https://github.com/SikandarJODD',

@@ -124,7 +124,7 @@
 	}
 
 	.globe-canvas {
-		display: block;
+		/* display: block; */
 		width: 100%;
 		height: 100%;
 	}
@@ -149,4 +149,13 @@
 		filter: blur(calc((1 - var(--marker-visible, 0)) * 8px));
 		translate: -50% calc((1 - var(--marker-visible, 0)) * 6px);
 	}
+
+	/* Responsive */
+	@media (max-width: 640px) {
+		.globe {
+			width: 320px;
+			height: 320px;
+		}
+	}
+	
 </style>

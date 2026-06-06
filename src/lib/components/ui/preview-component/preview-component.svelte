@@ -52,7 +52,7 @@
 		<Tabs.Content value="preview" class="mt-0" data-toc-ignore>
 			<div
 				class={cn(
-					'relative flex min-h-64 w-full overflow-hidden rounded-xl border border-ink/12 bg-card p-6 shadow-[0_1px_0_0_rgba(16,24,40,0.02)] dark:border-border',
+					'relative flex min-h-64 w-full overflow-hidden rounded-xl border border-ink/12 bg-card py-6 lg:p-6 shadow-[0_1px_0_0_rgba(16,24,40,0.02)] dark:border-border',
 					isCentered ? 'items-center justify-center' : '',
 					className
 				)}

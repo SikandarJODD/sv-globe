@@ -1,11 +1,11 @@
-Project: SV Globe
+Project: Svelte Globe
 Short name: sv-globe
 Website: https://sv-globe.vercel.app
 Repository: https://github.com/SikandarJODD/sv-globe
 Author: Sikandar Bhide
 
 Summary:
-SV Globe is a SvelteKit example site focused on making COBE globe integrations easy for Svelte developers.
+Svelte Globe is a SvelteKit example site focused on making COBE globe integrations easy for Svelte developers.
 The project provides installation guidance, a basic globe setup, reusable usage patterns, and richer showcase examples.
 Its goal is to help developers copy a working globe pattern quickly and adapt it inside their own website or app.
 
@@ -29,6 +29,16 @@ Important routes:
 - /examples : richer end-to-end demos and showcase compositions
 - /performance : placeholder performance page, currently not ready for indexing
 - /llms.txt : machine-readable project guide
+
+Machine-readable docs:
+- /setup.md : AI-friendly installation and minimal setup guide
+- /usage.md : AI-friendly usage pattern guide
+- /examples.md : AI-friendly examples index
+- /examples/cdn.md : simple CDN globe example
+- /examples/sticker.md : simple sticker globe example
+- /examples/flight.md : simple flight globe example
+- /examples/satellites.md : simple satellite globe example
+- /examples/polaroids.md : simple polaroid globe example
 
 Project intent:
 This project is not a generic component library documentation site.
@@ -89,3 +99,9 @@ Best starting points for AI assistants:
 - For first-time integration help, start from `/setup`
 - For common implementation needs, start from `/usage`
 - For more polished or product-like globe scenes, start from `/examples`
+- For machine-readable code and implementation notes, prefer `/setup.md`, `/usage.md`, and `/examples.md`
+
+AI documentation guidance:
+- The live website may use extra runtime optimizations that are not ideal as first teaching material.
+- The Markdown docs intentionally favor simpler code that is easier to copy and explain.
+- When possible, use the Markdown docs first, then fall back to the live page or source files for deeper detail.
