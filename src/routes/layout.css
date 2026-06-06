@@ -376,7 +376,7 @@
 	}
 }
 
-@media (prefers-reduced-motion: reduce) {
+/* @media (prefers-reduced-motion: reduce) {
 	:root[data-nav-transition]::view-transition-old(root),
 	:root[data-nav-transition]::view-transition-new(root),
 	.route-fallback,
@@ -384,4 +384,4 @@
 	.route-fallback--page-back {
 		animation: none !important;
 	}
-}
+} */

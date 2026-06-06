@@ -29,7 +29,7 @@
 		label = 'Sponsor my work'
 	}: Props = $props();
 
-	let open = $state(true);
+	let open = $state(false);
 
 	const upiLink =
 		'upi://pay?pa=imdead6174@oksbi&pn=Bhide%20Svelte&tn=Sponsor%20Bhide%20Svelte&am=400&cu=INR';

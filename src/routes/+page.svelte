@@ -2,7 +2,7 @@
 	import Hero from '$lib/components/base/hero.svelte';
 </script>
 
-<div class="space-y-16">
+<div class="space-y-16 pb-16 md:pb-0">
 	<Hero />
 
 	<div class="w-full max-w-3xl space-y-6 pb-8">
