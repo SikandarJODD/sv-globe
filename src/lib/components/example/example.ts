@@ -2,6 +2,7 @@ import type { Component } from 'svelte';
 
 import Cdn from '$lib/components/example/cdn.svelte';
 import Flight from '$lib/components/example/flight.svelte';
+import NeonGlobe from '$lib/components/example/neon-globe.svelte';
 import Polaroids from '$lib/components/example/polaroids.svelte';
 import Satellites from '$lib/components/example/satellites.svelte';
 import Sticker from '$lib/components/example/sticker.svelte';
@@ -16,6 +17,13 @@ export type ExampleItem = {
 };
 
 export const exampleItems: ExampleItem[] = [
+	{
+		title: 'Neon Globe',
+		desc: 'Focuses AWS regions with a select-driven neon marker card, smooth camera easing, and lazy globe startup for better performance.',
+		preview: NeonGlobe,
+		code: exampleCode.neonGlobe,
+		name: 'neon-globe.svelte'
+	},
 	{
 		title: 'CDN Globe',
 		desc: 'Shows an edge network with draggable rotation, animated node overlays, and route arcs between regions.',

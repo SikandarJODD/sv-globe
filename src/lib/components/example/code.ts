@@ -1581,10 +1581,308 @@ const flightCode = `<script lang="ts">
 \t}
 </style>`;
 
+const neonGlobeCode = `<script lang="ts">
+\timport { onDestroy, onMount } from 'svelte';
+\timport type { Globe } from 'cobe';
+\timport * as Select from '$lib/components/ui/select';
+
+\tconst regions = [
+\t\t{ id: 'us-east-1', label: 'US East 1 (N. Virginia)', code: 'us-east-1', location: [38.95, -77.45] as [number, number] },
+\t\t{ id: 'us-east-2', label: 'US East 2 (Ohio)', code: 'us-east-2', location: [39.96, -82.99] as [number, number] },
+\t\t{ id: 'us-west-2', label: 'US West 2 (Oregon)', code: 'us-west-2', location: [45.52, -122.68] as [number, number] },
+\t\t{ id: 'ap-southeast-1', label: 'Asia Pacific 1 (Singapore)', code: 'ap-southeast-1', location: [1.29, 103.85] as [number, number] },
+\t\t{ id: 'ap-southeast-2', label: 'Asia Pacific 2 (Sydney)', code: 'ap-southeast-2', location: [-33.87, 151.21] as [number, number] },
+\t\t{ id: 'eu-central-1', label: 'Europe Central 1 (Frankfurt)', code: 'eu-central-1', location: [50.11, 8.68] as [number, number] },
+\t\t{ id: 'eu-west-2', label: 'Europe West 2 (London)', code: 'eu-west-2', location: [51.51, -0.13] as [number, number] },
+\t\t{ id: 'sa-east-1', label: 'South America East 1 (Sao Paulo)', code: 'sa-east-1', location: [-23.55, -46.63] as [number, number] }
+\t];
+
+\tconst activeMarkerColor = [0.35, 0.98, 0.86] as [number, number, number];
+\tconst idleMarkerColor = [0.18, 0.56, 0.53] as [number, number, number];
+
+\tlet selectedRegionId = $state('eu-west-2');
+\tlet canvas: HTMLCanvasElement | null = null;
+\tlet globe: Globe | null = null;
+\tlet observer: IntersectionObserver | null = null;
+\tlet createGlobePromise: Promise<typeof import('cobe').default> | null = null;
+\tlet frame = 0;
+\tlet isVisible = false;
+\tlet currentPhi = 0;
+\tlet currentTheta = 0;
+\tlet renderedSize = 0;
+
+\tfunction getSelectedRegion() {
+\t\treturn regions.find((region) => region.id === selectedRegionId) ?? regions[0];
+\t}
+
+\tfunction locationToAngles(lat: number, long: number) {
+\t\treturn [Math.PI - ((long * Math.PI) / 180 - Math.PI / 2), (lat * Math.PI) / 180] as const;
+\t}
+
+\tfunction normalizeDelta(delta: number) {
+\t\treturn Math.atan2(Math.sin(delta), Math.cos(delta));
+\t}
+
+\tfunction getMarkers() {
+\t\tconst activeRegion = getSelectedRegion();
+
+\t\treturn regions.map((region) => ({
+\t\t\tid: region.id,
+\t\t\tlocation: region.location,
+\t\t\tsize: region.id === activeRegion.id ? 0.09 : 0.038,
+\t\t\tcolor: region.id === activeRegion.id ? activeMarkerColor : idleMarkerColor
+\t\t}));
+\t}
+
+\tfunction syncCanvasSize() {
+\t\tif (!canvas) return null;
+
+\t\tconst devicePixelRatio = Math.min(window.devicePixelRatio, 2);
+\t\tconst size = Math.max(320, Math.round(canvas.getBoundingClientRect().width * devicePixelRatio));
+
+\t\tif (globe && renderedSize !== size) {
+\t\t\tglobe.update({ width: size, height: size, devicePixelRatio });
+\t\t}
+
+\t\trenderedSize = size;
+\t\treturn { devicePixelRatio, size };
+\t}
+
+\tfunction stopAnimation() {
+\t\tif (!frame) return;
+\t\tcancelAnimationFrame(frame);
+\t\tframe = 0;
+\t}
+
+\tfunction animate() {
+\t\tif (!globe) {
+\t\t\tframe = 0;
+\t\t\treturn;
+\t\t}
+
+\t\tconst time = performance.now();
+\t\tconst activeRegion = getSelectedRegion();
+\t\tconst [focusPhi, focusTheta] = locationToAngles(...activeRegion.location);
+\t\tconst targetPhi = focusPhi + Math.sin(time * 0.00028) * 0.08;
+\t\tconst targetTheta = focusTheta + Math.sin(time * 0.0002) * 0.035;
+
+\t\tcurrentPhi += normalizeDelta(targetPhi - currentPhi) * 0.09;
+\t\tcurrentTheta += (targetTheta - currentTheta) * 0.08;
+
+\t\tglobe.update({
+\t\t\tphi: currentPhi,
+\t\t\ttheta: currentTheta,
+\t\t\tmarkers: getMarkers()
+\t\t});
+
+\t\tframe = requestAnimationFrame(animate);
+\t}
+
+\tasync function getCreateGlobe() {
+\t\tcreateGlobePromise ??= import('cobe').then((module) => module.default);
+\t\treturn createGlobePromise;
+\t}
+
+\tasync function startGlobe() {
+\t\tif (!canvas) return;
+
+\t\tif (globe) {
+\t\t\tif (!frame) animate();
+\t\t\treturn;
+\t\t}
+
+\t\tconst metrics = syncCanvasSize();
+\t\tif (!metrics) return;
+
+\t\tconst [initialPhi, initialTheta] = locationToAngles(...getSelectedRegion().location);
+\t\tcurrentPhi = initialPhi;
+\t\tcurrentTheta = initialTheta;
+
+\t\tconst createGlobe = await getCreateGlobe();
+\t\tif (!canvas || globe || !isVisible) return;
+
+\t\tglobe = createGlobe(canvas, {
+\t\t\tdevicePixelRatio: metrics.devicePixelRatio,
+\t\t\twidth: metrics.size,
+\t\t\theight: metrics.size,
+\t\t\tphi: currentPhi,
+\t\t\ttheta: currentTheta,
+\t\t\tdark: 1,
+\t\t\tdiffuse: 1.15,
+\t\t\tmapSamples: 18000,
+\t\t\tmapBrightness: 1.8,
+\t\t\tmapBaseBrightness: 0.06,
+\t\t\tbaseColor: [0.9, 0.93, 0.95],
+\t\t\tmarkerColor: idleMarkerColor,
+\t\t\tglowColor: [0.04, 0.25, 0.2],
+\t\t\tmarkers: getMarkers(),
+\t\t\tmarkerElevation: 0.02,
+\t\t\topacity: 0.92
+\t\t});
+
+\t\tanimate();
+\t}
+
+\tonMount(() => {
+\t\tif (!canvas) return;
+
+\t\tconst onResize = () => {
+\t\t\tsyncCanvasSize();
+\t\t};
+
+\t\twindow.addEventListener('resize', onResize, { passive: true });
+
+\t\tobserver = new IntersectionObserver(
+\t\t\t([entry]) => {
+\t\t\t\tif (!entry) return;
+
+\t\t\t\tisVisible = entry.isIntersecting;
+\t\t\t\tif (isVisible) {
+\t\t\t\t\tvoid startGlobe();
+\t\t\t\t\treturn;
+\t\t\t\t}
+
+\t\t\t\tstopAnimation();
+\t\t\t},
+\t\t\t{ threshold: 0.18 }
+\t\t);
+
+\t\tobserver.observe(canvas);
+
+\t\treturn () => {
+\t\t\twindow.removeEventListener('resize', onResize);
+\t\t\tobserver?.disconnect();
+\t\t\tstopAnimation();
+\t\t\tglobe?.destroy();
+\t\t};
+\t});
+
+\tonDestroy(() => {
+\t\tobserver?.disconnect();
+\t\tobserver = null;
+\t\tisVisible = false;
+\t});
+</script>
+
+<div class="neon-demo">
+\t<div class="neon-controls">
+\t\t<Select.Root bind:value={selectedRegionId}>
+\t\t\t<Select.Trigger class="neon-trigger w-full justify-between">
+\t\t\t\t<span>{getSelectedRegion().label}</span>
+\t\t\t</Select.Trigger>
+\t\t\t<Select.Content class="border border-[#39f7cb]/20 bg-[#030807]/96 text-white">
+\t\t\t\t{#each regions as region (region.id)}
+\t\t\t\t\t<Select.Item
+\t\t\t\t\t\tvalue={region.id}
+\t\t\t\t\t\tlabel={region.label}
+\t\t\t\t\t\tclass="text-white/88 data-highlighted:bg-[#0b1715] data-highlighted:text-white"
+\t\t\t\t\t>
+\t\t\t\t\t\t{region.label}
+\t\t\t\t\t</Select.Item>
+\t\t\t\t{/each}
+\t\t\t</Select.Content>
+\t\t</Select.Root>
+\t</div>
+
+\t<div class="neon-globe">
+\t\t<canvas bind:this={canvas} class="neon-canvas"></canvas>
+
+\t\t<div
+\t\t\tclass="neon-card"
+\t\t\tstyle={\`position-anchor: --cobe-\${getSelectedRegion().id}; --marker-visible: var(--cobe-visible-\${getSelectedRegion().id}, 0);\`}
+\t\t>
+\t\t\t<div class="neon-card-kicker">AWS Region</div>
+\t\t\t<p class="neon-card-title">{getSelectedRegion().label}</p>
+\t\t\t<p class="neon-card-code">{getSelectedRegion().code}</p>
+\t\t</div>
+\t</div>
+</div>
+
+<style>
+\t.neon-demo {
+\t\twidth: min(100%, 38rem);
+\t\tpadding: 1rem;
+\t\tborder: 1px solid rgb(57 247 203 / 0.12);
+\t\tbackground:
+\t\t\tradial-gradient(circle at top, rgb(17 64 56 / 0.48), transparent 42%),
+\t\t\tlinear-gradient(180deg, #071110 0%, #040807 55%, #020303 100%);
+\t}
+
+\t.neon-controls {
+\t\tmargin-bottom: 1rem;
+\t}
+
+\t.neon-trigger {
+\t\theight: 2.75rem;
+\t\tborder-color: rgb(57 247 203 / 0.22);
+\t\tbackground: rgb(1 8 7 / 0.72);
+\t\tcolor: rgb(246 252 251 / 0.94);
+\t}
+
+\t.neon-globe {
+\t\tposition: relative;
+\t\twidth: min(100%, 26rem);
+\t\tmargin-inline: auto;
+\t\taspect-ratio: 1;
+\t}
+
+\t.neon-canvas {
+\t\twidth: 100%;
+\t\theight: 100%;
+\t\tborder-radius: 9999px;
+\t}
+
+\t.neon-card {
+\t\tposition: absolute;
+\t\tbottom: anchor(top);
+\t\tleft: anchor(center);
+\t\ttranslate: -50% 0;
+\t\twidth: min(16rem, calc(100vw - 5rem));
+\t\tpadding: 0.9rem 1rem;
+\t\tborder: 1px solid rgb(57 247 203 / 0.85);
+\t\tbackground: linear-gradient(180deg, rgb(5 12 10 / 0.96), rgb(3 8 7 / 0.92));
+\t\tbox-shadow:
+\t\t\t0 0 0 1px rgb(57 247 203 / 0.08),
+\t\t\t0 0 24px rgb(57 247 203 / 0.16),
+\t\t\t0 18px 36px rgb(0 0 0 / 0.28);
+\t\topacity: var(--marker-visible, 0);
+\t\tfilter: blur(calc((1 - var(--marker-visible, 0)) * 8px));
+\t\ttransition:
+\t\t\topacity 0.24s ease,
+\t\t\tfilter 0.24s ease;
+\t\tpointer-events: none;
+\t}
+
+\t.neon-card-kicker {
+\t\tmargin-bottom: 0.55rem;
+\t\tfont-size: 0.78rem;
+\t\tfont-weight: 600;
+\t\tcolor: rgb(208 220 216 / 0.76);
+\t}
+
+\t.neon-card-title {
+\t\tmargin: 0;
+\t\tfont-size: 1.05rem;
+\t\tfont-weight: 700;
+\t\tline-height: 1.3;
+\t\tcolor: white;
+\t}
+
+\t.neon-card-code {
+\t\tmargin: 0.55rem 0 0;
+\t\tfont-family: monospace;
+\t\tfont-size: 0.75rem;
+\t\tletter-spacing: 0.12em;
+\t\ttext-transform: uppercase;
+\t\tcolor: rgb(136 245 221 / 0.78);
+\t}
+</style>`;
+
 export const exampleCode = {
 	sticker: stickerCode,
 	polaroid: polaroidCode,
 	satellites: satellitesCode,
 	cdn: cdnCode,
-	flight: flightCode
+	flight: flightCode,
+	neonGlobe: neonGlobeCode
 } as const;
