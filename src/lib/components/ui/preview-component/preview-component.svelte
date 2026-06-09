@@ -6,6 +6,7 @@
 	import type { ComponentProps, Snippet } from 'svelte';
 
 	interface PreviewComponentProps {
+		title?: string;
 		children: Snippet;
 		code?: ComponentProps<typeof Code>;
 		showRetry?: boolean;
@@ -18,7 +19,8 @@
 		children,
 		showRetry = true,
 		isCentered = true,
-		class: className = ''
+		class: className = '',
+		title
 	}: PreviewComponentProps = $props();
 
 	type TabValue = 'preview' | 'code';

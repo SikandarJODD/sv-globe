@@ -7,6 +7,7 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import { cn } from '$lib/utils';
 	import type { Component } from 'svelte';
+	import { PUBLIC_UPI_LINK } from '$env/static/public';
 
 	type SponsorLinkOption = {
 		key: 'polar' | 'github';
@@ -31,8 +32,7 @@
 
 	let open = $state(false);
 
-	const upiLink =
-		'upi://pay?pa=imdead6174@oksbi&pn=Bhide%20Svelte&tn=Sponsor%20Bhide%20Svelte&cu=INR';
+	const upiLink = PUBLIC_UPI_LINK;
 
 	let sponsorOptions: SponsorLinkOption[] = $derived([
 		{ key: 'polar', label: 'Polar', href: polarCheckoutLink, logo: polarLogo },

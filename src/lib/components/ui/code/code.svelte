@@ -11,6 +11,7 @@
 	};
 
 	export type CodeProps = {
+		title?: string; // optional title for block, for analytics purpose
 		name: string;
 		code: string;
 		overflow?: 'scroll' | 'wrap';
@@ -25,7 +26,8 @@
 		overflow = 'scroll',
 		stickyHeader = true,
 		disableFileHeader = false,
-		theme = defaultTheme
+		theme = defaultTheme,
+		title
 	}: CodeProps = $props();
 
 	let container: HTMLDivElement | null = null;
@@ -109,7 +111,6 @@
 		destroyCode();
 		container = null;
 	});
-
 </script>
 
 <div
@@ -125,7 +126,7 @@
 			text={code}
 			size="icon-sm"
 			tabindex={0}
-			title={`Copy ${name}`}
+			title={`Copy ${title || name}`}
 			class="pointer-events-auto rounded-sm border border-dashed border-ink/50 bg-ink/5 text-ink shadow-none backdrop-blur-sm transition-colors hover:border-ink/50 hover:bg-ink/10 hover:text-ink dark:border-primary/50  dark:bg-card/90 dark:text-primary dark:hover:bg-primary/10 [&_svg]:size-3.5"
 		/>
 	</div>

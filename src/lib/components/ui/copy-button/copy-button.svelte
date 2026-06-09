@@ -10,6 +10,7 @@
 			text: string;
 			icon?: Snippet<[]>;
 			animationDuration?: number;
+			title?: string;
 			onCopy?: (status: 'success' | 'failure' | undefined) => void;
 		}
 	>;
@@ -39,6 +40,7 @@
 		class: className,
 		tabindex = -1,
 		children,
+		title,
 		...rest
 	}: CopyButtonProps = $props();
 
@@ -69,6 +71,7 @@
 	class={cn('flex items-center gap-2', className)}
 	type="button"
 	name="copy"
+	data-s-event={title}
 	{...merged as /* eslint-disable-line @typescript-eslint/no-explicit-any */ any}
 >
 	{#if clipboard.status === 'success'}

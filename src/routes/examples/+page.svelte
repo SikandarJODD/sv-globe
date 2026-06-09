@@ -39,7 +39,7 @@
 				</p>
 			</div>
 
-			<PreviewComponent code={{ name: item.name, code: item.code }}>
+			<PreviewComponent code={{ name: item.name, code: item.code, title: item.title }}>
 				{#snippet children()}
 					<item.preview />
 				{/snippet}
