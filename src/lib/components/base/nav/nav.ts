@@ -23,7 +23,7 @@ export const docsRouteStack: DocsRouteEntry[] = [
 	},
 	{
 		href: '/setup',
-		navLabel: 'Setup',
+		navLabel: 'Installation & Setup',
 		label: 'Installation & Setup',
 		description: 'Install COBE, preview the base setup, and add your first globe.'
 	},

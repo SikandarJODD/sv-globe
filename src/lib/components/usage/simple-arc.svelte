@@ -1,5 +1,4 @@
 <script lang="ts">
-	// Basic Example
 	import type { Globe } from 'cobe';
 	import { onDestroy, onMount } from 'svelte';
 
@@ -11,7 +10,6 @@
 	let phi = 0;
 	let frame = 0;
 
-	// Animate the globe
 	function animate() {
 		if (!globe) {
 			frame = 0;
@@ -65,6 +63,14 @@
 			baseColor: [1, 1, 1],
 			markerColor: [0.2, 0.4, 1],
 			glowColor: [1, 1, 1],
+			markers: [
+				{ id: 'delhi', location: [28.61, 77.21], size: 0.04 },
+				{ id: 'singapore', location: [1.35, 103.82], size: 0.04 }
+			],
+			arcs: [{ id: 'delhi-singapore', from: [28.61, 77.21], to: [1.35, 103.82] }],
+			arcColor: [0.3, 0.5, 1],
+			arcWidth: 0.5,
+			arcHeight: 0.18,
 			markerElevation: 0
 		});
 

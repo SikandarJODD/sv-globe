@@ -30,10 +30,68 @@ const baseCode = `<script lang="ts">
 \t\t\tbaseColor: [1, 1, 1],
 \t\t\tmarkerColor: [0.2, 0.4, 1],
 \t\t\tglowColor: [1, 1, 1],
-\t\t\tmarkers: [
-\t\t\t\t{ location: [37.78, -122.44], size: 0.03, id: 'sf' },
-\t\t\t\t{ location: [40.71, -74.01], size: 0.03, id: 'nyc' }
-\t\t\t]
+\t\t});
+
+\t\tanimate();
+
+\t\treturn () => {
+\t\t\tcancelAnimationFrame(frame);
+\t\t\tglobe?.destroy();
+\t\t};
+\t});
+</script>
+
+<div class="globe">
+\t<canvas bind:this={canvas} class="globe-canvas"></canvas>
+</div>
+
+<style>
+\t.globe {
+\t\twidth: 300px;
+\t\theight: 300px;
+\t}
+
+\t.globe-canvas {
+\t\tdisplay: block;
+\t\twidth: 100%;
+\t\theight: 100%;
+\t}
+</style>
+`;
+
+const firstMarkerCode = `<script lang="ts">
+\timport createGlobe from 'cobe';
+\timport type { Globe } from 'cobe';
+\timport { onMount } from 'svelte';
+
+\tlet canvas: HTMLCanvasElement | null = null;
+\tlet globe: Globe | null = null;
+\tlet phi = 0;
+\tlet frame = 0;
+
+\tfunction animate() {
+\t\tphi += 0.005;
+\t\tglobe?.update({ phi });
+\t\tframe = requestAnimationFrame(animate);
+\t}
+
+\tonMount(() => {
+\t\tif (!canvas) return;
+
+\t\tglobe = createGlobe(canvas, {
+\t\t\tdevicePixelRatio: Math.min(window.devicePixelRatio, 2),
+\t\t\twidth: 300,
+\t\t\theight: 300,
+\t\t\tphi: 0,
+\t\t\ttheta: 0.2,
+\t\t\tdark: 0,
+\t\t\tdiffuse: 1.2,
+\t\t\tmapSamples: 13000,
+\t\t\tmapBrightness: 6,
+\t\t\tbaseColor: [1, 1, 1],
+\t\t\tmarkerColor: [0.2, 0.4, 1],
+\t\t\tglowColor: [1, 1, 1],
+\t\t\tmarkers: [{ location: [28.61, 77.21], size: 0.05 }]
 \t\t});
 
 \t\tanimate();
@@ -96,6 +154,75 @@ const basicCode = `<script lang="ts">
 <div class="globe">
 \t<canvas bind:this={canvas} class="globe-canvas"></canvas>
 </div>
+`;
+
+const simpleArcCode = `<script lang="ts">
+\timport createGlobe from 'cobe';
+\timport type { Globe } from 'cobe';
+\timport { onMount } from 'svelte';
+
+\tlet canvas: HTMLCanvasElement | null = null;
+\tlet globe: Globe | null = null;
+\tlet phi = 0;
+\tlet frame = 0;
+
+\tfunction animate() {
+\t\tphi += 0.005;
+\t\tglobe?.update({ phi });
+\t\tframe = requestAnimationFrame(animate);
+\t}
+
+\tonMount(() => {
+\t\tif (!canvas) return;
+
+\t\tglobe = createGlobe(canvas, {
+\t\t\tdevicePixelRatio: Math.min(window.devicePixelRatio, 2),
+\t\t\twidth: 300,
+\t\t\theight: 300,
+\t\t\tphi: 0,
+\t\t\ttheta: 0.2,
+\t\t\tdark: 0,
+\t\t\tdiffuse: 1.2,
+\t\t\tmapSamples: 13000,
+\t\t\tmapBrightness: 6,
+\t\t\tbaseColor: [1, 1, 1],
+\t\t\tmarkerColor: [0.2, 0.4, 1],
+\t\t\tglowColor: [1, 1, 1],
+\t\t\tmarkers: [
+\t\t\t\t{ location: [28.61, 77.21], size: 0.04 },
+\t\t\t\t{ location: [1.35, 103.82], size: 0.04 }
+\t\t\t],
+\t\t\tarcs: [{ from: [28.61, 77.21], to: [1.35, 103.82] }],
+\t\t\tarcColor: [0.3, 0.5, 1],
+\t\t\tarcWidth: 0.5,
+\t\t\tarcHeight: 0.18
+\t\t});
+
+\t\tanimate();
+
+\t\treturn () => {
+\t\t\tcancelAnimationFrame(frame);
+\t\t\tglobe?.destroy();
+\t\t};
+\t});
+</script>
+
+<div class="globe">
+\t<canvas bind:this={canvas} class="globe-canvas"></canvas>
+</div>
+
+<style>
+\t.globe {
+\t\twidth: 300px;
+\t\theight: 300px;
+\t}
+
+\t.globe-canvas {
+\t\tdisplay: block;
+\t\twidth: 100%;
+\t\theight: 100%;
+\t}
+</style>
 `;
 
 const cssAnchorCode = `<script lang="ts">
@@ -550,7 +677,9 @@ const performanceCode = `<script lang="ts">
 
 export const usageCode = {
 	base: baseCode,
+	firstMarker: firstMarkerCode,
 	basic: basicCode,
+	simpleArc: simpleArcCode,
 	colors: colorsCode,
 	cssAnchor: cssAnchorCode,
 	draggable: draggableCode,
