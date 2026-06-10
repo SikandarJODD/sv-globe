@@ -59,6 +59,8 @@
 
 	<DropdownMenu.Content
 		sideOffset={8}
+		preventScroll={false}
+		interactOutsideBehavior='ignore'
 		class="w-56 border border-dashed border-ink/40 bg-background p-1 text-ink shadow-none dark:border-primary/30 dark:bg-card dark:text-primary"
 	>
 		<div class="flex flex-col gap-1">

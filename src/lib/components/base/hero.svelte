@@ -1,10 +1,5 @@
-<script lang="ts">
-	const exampleItems = [
-		'Basic globe setup',
-		'Markers and focus states',
-		'Auto-rotation and drag controls',
-		'Responsive sizing patterns'
-	];
+<script>
+	import Button from '$lib/components/ui/button/button.svelte';
 </script>
 
 <div class="w-full max-w-3xl text-center lg:text-left">
@@ -27,40 +22,12 @@
 				Cobe
 			</a>.
 		</p>
+
+		<div
+			class="flex flex-col items-center gap-2.5 pt-2 sm:flex-row sm:justify-center lg:justify-start"
+		>
+			<Button size="lg" class="bg-ink hover:bg-ink/80! dark:hover:bg-primary/80! border border-ink dark:border-primary dark:bg-primary font-gp" href="/setup">Get Started</Button>
+			<Button size="lg" variant="outline" class="font-gp border-ink border-dashed text-ink dark:text-primary hover:bg-ink-dim hover:text-ink/90" href="/examples">View Examples</Button>
+		</div>
 	</section>
-
-	<!-- <div class="mt-14 space-y-14">
-		<section id="install" class="scroll-mt-24 space-y-3">
-			<h2 class="font-gp-circle text-2xl text-foreground">Install</h2>
-			<p class="max-w-2xl text-sm leading-7 text-muted-foreground">
-				Install the package, start the dev server, and keep the first integration small. This layout
-				is intentionally minimal.
-			</p>
-		</section>
-
-		<section id="usage" class="scroll-mt-24 space-y-3">
-			<h2 class="font-gp-circle text-2xl text-foreground">Usage</h2>
-			<p class="max-w-2xl text-sm leading-7 text-muted-foreground">
-				Use the examples as a starting point, then swap in your own markers, themes, and interaction
-				settings as needed.
-			</p>
-		</section>
-
-		<section id="examples" class="scroll-mt-24 space-y-4">
-			<h2 class="font-gp-circle text-2xl text-foreground">Examples</h2>
-			<ul class="space-y-2 text-sm text-muted-foreground">
-				{#each exampleItems as item (item)}
-					<li>{item}</li>
-				{/each}
-			</ul>
-		</section>
-
-		<section id="llms" class="scroll-mt-24 space-y-3">
-			<h2 class="font-gp-circle text-2xl text-foreground">llms.txt</h2>
-			<p class="max-w-2xl text-sm leading-7 text-muted-foreground">
-				A minimal machine-readable project summary is available at
-				<a href="/llms.txt" class="text-primary underline underline-offset-2">/llms.txt</a>.
-			</p>
-		</section>
-	</div> -->
 </div>
