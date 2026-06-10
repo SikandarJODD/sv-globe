@@ -1,9 +1,9 @@
 <script lang="ts">
 	import ChevronDownIcon from '@lucide/svelte/icons/chevron-down';
-	import SmileIcon from '@lucide/svelte/icons/smile';
+	// import SmileIcon from '@lucide/svelte/icons/smile';
 	import githubLogo from '$lib/assets/github.svelte';
 	import polarLogo from '$lib/assets/polar.svelte';
-	import { QRCode } from '$lib/components/spell/qrcode/index.js';
+	// import { QRCode } from '$lib/components/spell/qrcode/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import { cn } from '$lib/utils';
 	import type { Component } from 'svelte';
@@ -32,14 +32,14 @@
 
 	let open = $state(false);
 
-	const upiLink = PUBLIC_UPI_LINK;
+	let upiLink = $derived(PUBLIC_UPI_LINK);
 
 	let sponsorOptions: SponsorLinkOption[] = $derived([
 		{ key: 'polar', label: 'Polar', href: polarCheckoutLink, logo: polarLogo },
 		{ key: 'github', label: 'GitHub', href: githubSponsorLink, logo: githubLogo }
 	]);
 
-	const closeMenu = () => {
+	let closeMenu = () => {
 		open = false;
 	};
 </script>
@@ -79,8 +79,7 @@
 					</a>
 				{/each}
 			</div>
-
-			<div class="border-t border-dashed border-ink/20 pt-1 dark:border-primary/20">
+			<!-- <div class="border-t border-dashed border-ink/20 pt-1 dark:border-primary/20">
 				<div
 					class="sponsor-qr-panel relative border border-dashed border-ink/30 bg-ink-dim/20 p-3 dark:border-primary/30 dark:bg-teal-900/10"
 				>
@@ -114,13 +113,13 @@
 						<SmileIcon class="size-3" />
 					</div>
 				</div>
-			</div>
+			</div> -->
 		</div>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
 
 <style>
-	.sponsor-qr-panel {
+	/* .sponsor-qr-panel {
 		--sponsor-qr-fg: var(--color-ink);
 		--sponsor-qr-bg: var(--color-ink-dim);
 	}
@@ -128,5 +127,5 @@
 	:global(.dark) .sponsor-qr-panel {
 		--sponsor-qr-fg: oklch(90.701% 0.14561 187.94);
 		--sponsor-qr-bg: oklch(27.101% 0.03175 209.055);
-	}
+	} */
 </style>
