@@ -280,7 +280,7 @@
 			<Select.Trigger class="neon-trigger w-full min-w-0 justify-between">
 				<span class="truncate">{selectedRegion.label}</span>
 			</Select.Trigger>
-			<Select.Content class="neon-content border border-[#39f7cb]/20">
+			<Select.Content interactOutsideBehavior='ignore' class="neon-content border border-[#39f7cb]/20">
 				{#each regions as region (region.id)}
 					<Select.Item value={region.id} label={region.label} class="neon-item ">
 						{region.label}
@@ -338,12 +338,14 @@
 		translate: -50% 20px;
 		width: min(16rem, calc(100vw - 5rem));
 		padding: 1rem;
-		border: 1px solid rgb(57 247 203 / 0.5);
-		background: linear-gradient(180deg, rgb(5 12 10 / 0.96), rgb(3 8 7 / 0.92)), rgb(3 8 7 / 0.92);
-		box-shadow:
-			0 0 0 1px rgb(57 247 203 / 0.08),
-			0 0 24px rgb(57 247 203 / 0.16),
-			0 18px 36px rgb(0 0 0 / 0.28);
+		border: 1px solid rgba(10, 228, 156, 0.94);
+		background:
+			linear-gradient(180deg, rgb(255 255 255 / 0.96), rgb(240 253 250 / 0.94)),
+			rgb(255 255 255 / 0.95);
+		/* box-shadow:
+			0 0 0 1px rgb(16 185 129 / 0.08),
+			0 0 24px rgb(45 212 191 / 0.12),
+			0 18px 36px rgb(15 23 42 / 0.1); */
 		opacity: var(--marker-visible, 0);
 		filter: blur(calc((1 - var(--marker-visible, 0)) * 8px));
 		transition:
@@ -361,7 +363,7 @@
 		font-family: var(--font-figtree), sans-serif;
 		font-size: 12px;
 		font-weight: 600;
-		color: rgb(208 220 216 / 0.76);
+		color: rgb(71 85 105 / 0.88);
 	}
 
 	.neon-card-dot {
@@ -378,7 +380,7 @@
 		font-size: 16px;
 		font-weight: 600;
 		line-height: 1.2;
-		color: white;
+		color: rgb(15 23 42);
 	}
 
 	.neon-card-code {
@@ -387,6 +389,27 @@
 		font-size: 0.75rem;
 		letter-spacing: 0.12em;
 		text-transform: uppercase;
+		color: rgb(13 148 136 / 0.9);
+	}
+
+	:global(.dark) .neon-card {
+		border-color: rgb(57 247 203 / 0.5);
+		background: linear-gradient(180deg, rgb(5 12 10 / 0.96), rgb(3 8 7 / 0.92)), rgb(3 8 7 / 0.92);
+		box-shadow:
+			0 0 0 1px rgb(57 247 203 / 0.08),
+			0 0 24px rgb(57 247 203 / 0.16),
+			0 18px 36px rgb(0 0 0 / 0.28);
+	}
+
+	:global(.dark) .neon-card-kicker {
+		color: rgb(208 220 216 / 0.76);
+	}
+
+	:global(.dark) .neon-card-title {
+		color: white;
+	}
+
+	:global(.dark) .neon-card-code {
 		color: rgb(136 245 221 / 0.78);
 	}
 
